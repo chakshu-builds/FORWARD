@@ -103,14 +103,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 <div
                   className="dropdown-item alert"
                   onClick={() => {
-                    onSelectNotificationItem?.('evt-developer-summit');
+                    onSelectNotificationItem?.('evt-hack-on-hills-8');
                     setIsNotificationsOpen(false);
                   }}
                 >
                   <AlertCircle size={16} className="text-red" />
                   <div className="dropdown-item-texts">
                     <strong>Conflicting date detected</strong>
-                    <span>Developer Summit schedule updated to 28 Oct</span>
+                    <span>Hack On Hills 8.0 schedule updated on Devfolio</span>
                     <span className="dropdown-time">2h ago</span>
                   </div>
                 </div>
@@ -118,14 +118,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 <div
                   className="dropdown-item warning"
                   onClick={() => {
-                    onSelectNotificationItem?.('evt-tech-conclave-2026');
+                    onSelectNotificationItem?.('evt-search-fundamentals-gurugram-2026');
                     setIsNotificationsOpen(false);
                   }}
                 >
                   <AlertCircle size={16} className="text-orange" />
                   <div className="dropdown-item-texts">
                     <strong>Missing venue information</strong>
-                    <span>Tech Conclave 2026 circular lacks venue</span>
+                    <span>Search Fundamentals Gurugram lacks venue hall</span>
                     <span className="dropdown-time">5h ago</span>
                   </div>
                 </div>
@@ -133,14 +133,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 <div
                   className="dropdown-item info"
                   onClick={() => {
-                    onSelectNotificationItem?.('evt-google-winter-internship');
+                    onSelectNotificationItem?.('evt-atomic-hack-india-2026');
                     setIsNotificationsOpen(false);
                   }}
                 >
                   <RefreshCw size={16} className="text-blue" />
                   <div className="dropdown-item-texts">
-                    <strong>New update available</strong>
-                    <span>Google Winter Internship deadline confirmed</span>
+                    <strong>Registration closing soon</strong>
+                    <span>Atomic Hack India qualification registration closes in 6d</span>
                     <span className="dropdown-time">1d ago</span>
                   </div>
                 </div>

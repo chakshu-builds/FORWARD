@@ -48,49 +48,56 @@ import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
 
 export function App() {
+  // Clean up legacy mock data storage keys once to guarantee real dataset is used
+  useEffect(() => {
+    ['forward_events_v2', 'forward_events_v1', 'forward_attention_v2', 'forward_recent_v2', 'forward_moves_v2', 'forward_sources_v1'].forEach((k) => {
+      localStorage.removeItem(k);
+    });
+  }, []);
+
   // Main Data States with localStorage persistence fallback
   const [events, setEvents] = useState<EventItem[]>(() => {
-    const saved = localStorage.getItem('forward_events_v2');
+    const saved = localStorage.getItem('forward_events_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_EVENTS;
   });
 
   const [attentionItems, setAttentionItems] = useState<AttentionItem[]>(() => {
-    const saved = localStorage.getItem('forward_attention_v2');
+    const saved = localStorage.getItem('forward_attention_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_ATTENTION_ITEMS;
   });
 
   const [recentlyAdded, setRecentlyAdded] = useState<RecentlyAddedItem[]>(() => {
-    const saved = localStorage.getItem('forward_recent_v2');
+    const saved = localStorage.getItem('forward_recent_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_RECENTLY_ADDED;
   });
 
   const [nextMoves, setNextMoves] = useState<PrepTask[]>(() => {
-    const saved = localStorage.getItem('forward_moves_v2');
+    const saved = localStorage.getItem('forward_moves_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_NEXT_MOVES;
   });
 
   const [sources, setSources] = useState<SourceItem[]>(() => {
-    const saved = localStorage.getItem('forward_sources_v1');
+    const saved = localStorage.getItem('forward_sources_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_SOURCES;
   });
 
   const [sourceActivities, setSourceActivities] = useState<SourceActivityItem[]>(() => {
-    const saved = localStorage.getItem('forward_activities_v1');
+    const saved = localStorage.getItem('forward_activities_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_SOURCE_ACTIVITIES;
   });
 
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('forward_profile_v1');
+    const saved = localStorage.getItem('forward_profile_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_USER_PROFILE;
   });
 
   const [notifications, setNotifications] = useState<NotificationSettings>(() => {
-    const saved = localStorage.getItem('forward_notifications_v1');
+    const saved = localStorage.getItem('forward_notifications_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
   });
 
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
-    const saved = localStorage.getItem('forward_preferences_v1');
+    const saved = localStorage.getItem('forward_preferences_v3_real');
     return saved ? JSON.parse(saved) : INITIAL_PREFERENCES;
   });
 
@@ -115,39 +122,39 @@ export function App() {
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('forward_events_v2', JSON.stringify(events));
+    localStorage.setItem('forward_events_v3_real', JSON.stringify(events));
   }, [events]);
 
   useEffect(() => {
-    localStorage.setItem('forward_attention_v2', JSON.stringify(attentionItems));
+    localStorage.setItem('forward_attention_v3_real', JSON.stringify(attentionItems));
   }, [attentionItems]);
 
   useEffect(() => {
-    localStorage.setItem('forward_recent_v2', JSON.stringify(recentlyAdded));
+    localStorage.setItem('forward_recent_v3_real', JSON.stringify(recentlyAdded));
   }, [recentlyAdded]);
 
   useEffect(() => {
-    localStorage.setItem('forward_moves_v2', JSON.stringify(nextMoves));
+    localStorage.setItem('forward_moves_v3_real', JSON.stringify(nextMoves));
   }, [nextMoves]);
 
   useEffect(() => {
-    localStorage.setItem('forward_sources_v1', JSON.stringify(sources));
+    localStorage.setItem('forward_sources_v3_real', JSON.stringify(sources));
   }, [sources]);
 
   useEffect(() => {
-    localStorage.setItem('forward_activities_v1', JSON.stringify(sourceActivities));
+    localStorage.setItem('forward_activities_v3_real', JSON.stringify(sourceActivities));
   }, [sourceActivities]);
 
   useEffect(() => {
-    localStorage.setItem('forward_profile_v1', JSON.stringify(userProfile));
+    localStorage.setItem('forward_profile_v3_real', JSON.stringify(userProfile));
   }, [userProfile]);
 
   useEffect(() => {
-    localStorage.setItem('forward_notifications_v1', JSON.stringify(notifications));
+    localStorage.setItem('forward_notifications_v3_real', JSON.stringify(notifications));
   }, [notifications]);
 
   useEffect(() => {
-    localStorage.setItem('forward_preferences_v1', JSON.stringify(preferences));
+    localStorage.setItem('forward_preferences_v3_real', JSON.stringify(preferences));
 
     // Theme application to documentElement
     const theme = preferences.theme;
@@ -201,15 +208,17 @@ export function App() {
 
   // Reset demo data
   const handleResetDemoData = () => {
-    localStorage.removeItem('forward_events_v2');
-    localStorage.removeItem('forward_attention_v2');
-    localStorage.removeItem('forward_recent_v2');
-    localStorage.removeItem('forward_moves_v2');
-    localStorage.removeItem('forward_sources_v1');
-    localStorage.removeItem('forward_activities_v1');
-    localStorage.removeItem('forward_profile_v1');
-    localStorage.removeItem('forward_notifications_v1');
-    localStorage.removeItem('forward_preferences_v1');
+    [
+      'forward_events_v3_real',
+      'forward_attention_v3_real',
+      'forward_recent_v3_real',
+      'forward_moves_v3_real',
+      'forward_sources_v3_real',
+      'forward_activities_v3_real',
+      'forward_profile_v3_real',
+      'forward_notifications_v3_real',
+      'forward_preferences_v3_real'
+    ].forEach((k) => localStorage.removeItem(k));
     setEvents(INITIAL_EVENTS);
     setAttentionItems(INITIAL_ATTENTION_ITEMS);
     setRecentlyAdded(INITIAL_RECENTLY_ADDED);
@@ -219,7 +228,7 @@ export function App() {
     setUserProfile(INITIAL_USER_PROFILE);
     setNotifications(INITIAL_NOTIFICATIONS);
     setPreferences(INITIAL_PREFERENCES);
-    addToast('info', 'Prototype Reset', 'Restored default reference dashboard state.');
+    addToast('info', 'Prototype Reset', 'Restored real event seed dataset.');
   };
 
   // Selected event getters
@@ -796,8 +805,8 @@ export function App() {
 
               {/* 4 Summary Metric Cards */}
               <MetricsRow
-                upcomingCount={12}
-                deadlinesCount={5}
+                upcomingCount={events.length}
+                deadlinesCount={events.filter((e) => e.deadlineDaysLeft !== undefined && e.deadlineDaysLeft >= 0 && e.deadlineDaysLeft <= 7).length}
                 needsReviewCount={unresolvedAttentionCount}
                 registeredCount={events.filter((e) => e.status === 'Registered').length}
                 onCardClick={(type) => {

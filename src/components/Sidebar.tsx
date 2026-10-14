@@ -72,10 +72,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={`sidebar-nav-item ${activeView === 'needs-review' ? 'active' : ''}`}
           onClick={() => setActiveView('needs-review')}
         >
-          <div className="sidebar-nav-item-inner">
-            <FileWarning size={18} strokeWidth={activeView === 'needs-review' ? 2.2 : 1.8} />
-            <span>Needs Review</span>
-          </div>
+          <FileWarning size={18} strokeWidth={activeView === 'needs-review' ? 2.2 : 1.8} />
+          <span>Needs Review</span>
           {conflictCount > 0 && (
             <span className="sidebar-badge-count">{conflictCount}</span>
           )}

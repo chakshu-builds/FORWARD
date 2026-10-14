@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { ExtractionDraft } from '../types';
 import { SAMPLE_CAPTURE_PRESETS, SAMPLE_EXTRACTION_RESULT } from '../data/mockData';
 import { X, FileText, UploadCloud, Link as LinkIcon, Sparkles, Check, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
@@ -15,24 +15,13 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   onExtractionSuccess,
 }) => {
   const [activeTab, setActiveTab] = useState<'text' | 'file' | 'link'>('text');
-  const [textInput, setTextInput] = useState('');
-  const [linkInput, setLinkInput] = useState('');
-  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [textInput, setTextInput] = useState(() => SAMPLE_CAPTURE_PRESETS.textSnippet);
+  const [linkInput, setLinkInput] = useState(() => SAMPLE_CAPTURE_PRESETS.sampleUrl);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(() => SAMPLE_CAPTURE_PRESETS.flyerName);
 
   // Simulation state
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState(0);
-
-  useEffect(() => {
-    if (isOpen) {
-      // Reset state on open
-      setIsProcessing(false);
-      setProcessingStep(0);
-      setTextInput(SAMPLE_CAPTURE_PRESETS.textSnippet);
-      setLinkInput(SAMPLE_CAPTURE_PRESETS.sampleUrl);
-      setSelectedFileName(SAMPLE_CAPTURE_PRESETS.flyerName);
-    }
-  }, [isOpen]);
 
   if (!isOpen) return null;
 

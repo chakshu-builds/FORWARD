@@ -160,8 +160,12 @@ export const MyTimelineView: React.FC<MyTimelineViewProps> = ({
   }, [events, timelineSearch, categoryFilter, statusFilter, dateFilter, sortBy]);
 
   // Derived counts for summary cards
+  const totalCount = events.length;
   const registeredCount = events.filter((e) => e.status === 'Registered').length;
   const upcomingCount = events.filter((e) => e.daysRemaining >= 0).length;
+  const deadlinesCount = events.filter(
+    (e) => e.deadlineDaysLeft !== undefined && e.deadlineDaysLeft >= 0 && e.deadlineDaysLeft <= 7
+  ).length;
 
   return (
     <div className="my-timeline-page">
@@ -186,10 +190,10 @@ export const MyTimelineView: React.FC<MyTimelineViewProps> = ({
 
       {/* 2. Four Compact Summary Cards */}
       <TimelineSummaryCards
-        totalCount={24}
-        upcomingCount={upcomingCount || 12}
-        registeredCount={registeredCount || 6}
-        deadlinesCount={5}
+        totalCount={totalCount}
+        upcomingCount={upcomingCount}
+        registeredCount={registeredCount}
+        deadlinesCount={deadlinesCount}
         activeFilter={summaryCardFilter}
         onSelectFilter={handleSelectSummaryCard}
       />

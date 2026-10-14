@@ -145,7 +145,7 @@ button {
 .sidebar-nav-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding: 9.5px 14px;
   border-radius: var(--radius-md);
   font-size: 0.88rem;
@@ -156,10 +156,8 @@ button {
   text-align: left;
 }
 
-.sidebar-nav-item-inner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.sidebar-nav-item .sidebar-badge-count {
+  margin-left: auto;
 }
 
 .sidebar-nav-item:hover {
