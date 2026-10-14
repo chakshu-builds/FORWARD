@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ActiveView } from '../types';
+import type { ActiveView, UserProfile } from '../types';
 import {
   House,
   CalendarDays,
@@ -17,6 +17,7 @@ interface SidebarProps {
   setActiveView: (view: ActiveView) => void;
   onOpenCapture: () => void;
   conflictCount: number;
+  userProfile?: UserProfile;
   onProfileMenuClick?: () => void;
 }
 
@@ -25,6 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveView,
   onOpenCapture,
   conflictCount,
+  userProfile,
   onProfileMenuClick
 }) => {
   return (
@@ -99,10 +101,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* User Profile Footer */}
       <div className="sidebar-profile-footer" onClick={onProfileMenuClick}>
         <div className="sidebar-profile-info">
-          <ChakshuAvatar size={36} />
+          <ChakshuAvatar size={36} src={userProfile?.avatarUrl} />
           <div className="sidebar-profile-texts">
-            <div className="sidebar-profile-name">Chakshu Arora</div>
-            <div className="sidebar-profile-role">Student</div>
+            <div className="sidebar-profile-name">{userProfile?.fullName || 'Chakshu Arora'}</div>
+            <div className="sidebar-profile-role">{userProfile?.role || 'Student'}</div>
           </div>
         </div>
         <button className="sidebar-profile-more-btn" aria-label="Profile options">

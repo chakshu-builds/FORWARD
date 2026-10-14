@@ -1,4 +1,4 @@
-import type { EventItem, ExtractionDraft, AttentionItem, RecentlyAddedItem, PrepTask, SourceItem, SourceActivityItem } from '../types';
+import type { EventItem, ExtractionDraft, AttentionItem, RecentlyAddedItem, PrepTask, SourceItem, SourceActivityItem, UserProfile, NotificationSettings, UserPreferences } from '../types';
 
 export const INITIAL_EVENTS: EventItem[] = [
   {
@@ -796,3 +796,25 @@ export const INITIAL_SOURCE_ACTIVITIES: SourceActivityItem[] = [
     status: 'warning'
   }
 ];
+
+export const INITIAL_USER_PROFILE: UserProfile = {
+  fullName: 'Chakshu Arora',
+  email: 'chakshu.arora@college.edu.in',
+  role: 'Student',
+  institution: 'Delhi University',
+  academicYear: '2nd Year',
+  avatarUrl: '/chakshu_arora.png'
+};
+
+export const INITIAL_NOTIFICATIONS: NotificationSettings = {
+  eventReminders: true,
+  newEventAlerts: true,
+  importantUpdates: false
+};
+
+export const INITIAL_PREFERENCES: UserPreferences = {
+  defaultView: 'List View',
+  sortEventsBy: 'Earliest First',
+  theme: 'light'
+};
+

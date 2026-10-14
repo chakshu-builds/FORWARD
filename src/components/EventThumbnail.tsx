@@ -261,7 +261,34 @@ export const EventThumbnail: React.FC<EventThumbnailProps> = ({ type, size = 44,
   }
 };
 
-export const ChakshuAvatar: React.FC<{ size?: number; className?: string }> = ({ size = 36, className = '' }) => {
+export const ChakshuAvatar: React.FC<{ size?: number; className?: string; src?: string }> = ({
+  size = 36,
+  className = '',
+  src = '/chakshu_arora.png'
+}) => {
+  const [hasError, setHasError] = React.useState(false);
+
+  if (!hasError && src) {
+    return (
+      <img
+        src={src}
+        alt="Chakshu Arora"
+        width={size}
+        height={size}
+        className={className}
+        onError={() => setHasError(true)}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          borderRadius: '50%',
+          objectFit: 'cover',
+          flexShrink: 0,
+          display: 'block'
+        }}
+      />
+    );
+  }
+
   return (
     <svg
       width={size}

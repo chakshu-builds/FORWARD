@@ -17,7 +17,7 @@ export interface ChangeHistoryEntry {
   timestamp: string;
   changeType: 'Created' | 'Field Updated' | 'Conflict Resolved' | 'Status Changed';
   description: string;
-  actor: 'Auto-Extracted' | 'User Manual' | 'Reconciliation Engine';
+  actor: 'Auto-Extracted' | 'User Manual' | 'Reconciliation Engine' | 'Seed Dataset';
 }
 
 export interface PrepTask {
@@ -72,7 +72,7 @@ export interface EventItem {
   daysRemaining: number;
   deadlineFormatted?: string;
   deadlineDaysLeft?: number;
-  timelineGroup?: 'Today' | 'Tomorrow' | 'This Week' | 'Later This Month' | 'Past Events';
+  timelineGroup?: 'Today' | 'Tomorrow' | 'This Week' | 'Later This Month' | 'Next Month' | 'Past Events';
   isUrgent?: boolean;
   createdAt?: string;
 }
@@ -152,3 +152,27 @@ export interface SourceActivityItem {
 }
 
 export type SourceActivity = SourceActivityItem;
+
+export interface UserProfile {
+  fullName: string;
+  email: string;
+  role: string;
+  institution: string;
+  academicYear: string;
+  avatarUrl?: string;
+}
+
+export interface NotificationSettings {
+  eventReminders: boolean;
+  newEventAlerts: boolean;
+  importantUpdates: boolean;
+}
+
+export type TimelineDefaultView = 'List View' | 'Calendar View';
+export type TimelineSortOption = 'Earliest First' | 'Latest First' | 'Registration Deadline' | 'Recently Added';
+
+export interface UserPreferences {
+  defaultView: TimelineDefaultView;
+  sortEventsBy: TimelineSortOption;
+  theme: 'light' | 'dark' | 'system';
+}

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Search, Bell, Check, AlertCircle, RefreshCw, LogOut, RotateCcw, User } from 'lucide-react';
 import { ChakshuAvatar } from './EventThumbnail';
+import type { UserProfile } from '../types';
 
 interface TopHeaderProps {
   searchQuery: string;
@@ -13,6 +14,8 @@ interface TopHeaderProps {
   setIsProfileOpen: (open: boolean) => void;
   onResetDemoData: () => void;
   onSelectNotificationItem?: (eventId: string) => void;
+  userProfile?: UserProfile;
+  onOpenSettings?: () => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
@@ -23,7 +26,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   isProfileOpen,
   setIsProfileOpen,
   onResetDemoData,
-  onSelectNotificationItem
+  onSelectNotificationItem,
+  userProfile,
+  onOpenSettings
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -163,23 +168,29 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             }}
             aria-label="User profile menu"
           >
-            <ChakshuAvatar size={34} />
+            <ChakshuAvatar size={34} src={userProfile?.avatarUrl} />
           </button>
 
           {/* Profile Dropdown */}
           {isProfileOpen && (
             <div className="header-dropdown profile-dropdown">
               <div className="profile-dropdown-user">
-                <ChakshuAvatar size={42} />
+                <ChakshuAvatar size={42} src={userProfile?.avatarUrl} />
                 <div>
-                  <strong className="profile-name">Chakshu Arora</strong>
-                  <div className="profile-email">chakshu.arora@campus.edu</div>
-                  <span className="profile-badge">Student · CSE 3rd Year</span>
+                  <strong className="profile-name">{userProfile?.fullName || 'Chakshu Arora'}</strong>
+                  <div className="profile-email">{userProfile?.email || 'chakshu.arora@college.edu.in'}</div>
+                  <span className="profile-badge">{userProfile?.role || 'Student'} · {userProfile?.institution || 'Delhi University'}</span>
                 </div>
               </div>
               <div className="dropdown-divider" />
               <div className="dropdown-items-list">
-                <button className="profile-menu-item" onClick={() => setIsProfileOpen(false)}>
+                <button
+                  className="profile-menu-item"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    if (onOpenSettings) onOpenSettings();
+                  }}
+                >
                   <User size={16} />
                   <span>Account & Preferences</span>
                 </button>

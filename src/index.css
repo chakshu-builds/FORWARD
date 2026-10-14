@@ -2303,3 +2303,66 @@ button {
   padding-left: 2px;
 }
 
+/* ==========================================================================
+   FORWARD DARK THEME SYSTEM & SETTINGS PAGE RESPONSIVENESS
+   ========================================================================== */
+
+[data-theme="dark"] {
+  --bg-app: #0f172a;
+  --bg-sidebar: #090d16;
+  --bg-card: #1e293b;
+  --bg-card-subtle: #162032;
+
+  --border-subtle: #1e293b;
+  --border-default: #334155;
+  --border-strong: #475569;
+
+  --text-navy: #f8fafc;
+  --text-navy-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+
+  --blue-tint-bg: rgba(37, 99, 235, 0.15);
+  --blue-tint-border: rgba(37, 99, 235, 0.35);
+  --blue-text: #60a5fa;
+}
+
+[data-theme="dark"] body {
+  background-color: var(--bg-app);
+  color: var(--text-navy);
+}
+
+[data-theme="dark"] .app-sidebar {
+  background-color: var(--bg-sidebar);
+  border-right-color: var(--border-default);
+}
+
+[data-theme="dark"] .app-header {
+  background-color: var(--bg-sidebar);
+  border-bottom-color: var(--border-default);
+}
+
+[data-theme="dark"] .dashboard-scroll-content {
+  background-color: var(--bg-app);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select {
+  background-color: var(--bg-card-subtle) !important;
+  color: var(--text-navy) !important;
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="dark"] .modal-container {
+  background-color: var(--bg-card) !important;
+  color: var(--text-navy) !important;
+  border: 1px solid var(--border-default);
+}
+
+@media (max-width: 960px) {
+  .settings-layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+

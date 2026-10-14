@@ -8,7 +8,10 @@ import type {
   RecentlyAddedItem,
   PrepTask,
   SourceItem,
-  SourceActivityItem
+  SourceActivityItem,
+  UserProfile,
+  NotificationSettings,
+  UserPreferences
 } from './types';
 import {
   INITIAL_EVENTS,
@@ -17,7 +20,10 @@ import {
   INITIAL_NEXT_MOVES,
   SAMPLE_EXTRACTION_RESULT,
   INITIAL_SOURCES,
-  INITIAL_SOURCE_ACTIVITIES
+  INITIAL_SOURCE_ACTIVITIES,
+  INITIAL_USER_PROFILE,
+  INITIAL_NOTIFICATIONS,
+  INITIAL_PREFERENCES
 } from './data/mockData';
 import { Sidebar } from './components/Sidebar';
 import { TopHeader } from './components/TopHeader';
@@ -32,6 +38,7 @@ import { MyTimelineView } from './components/MyTimelineView';
 import { AddEventView } from './components/AddEventView';
 import { NeedsReviewView } from './components/NeedsReviewView';
 import { SourcesView } from './components/SourcesView';
+import { SettingsView } from './components/SettingsView';
 
 import { CaptureModal } from './components/CaptureModal';
 import { ExtractionReviewModal } from './components/ExtractionReviewModal';
@@ -70,6 +77,21 @@ export function App() {
   const [sourceActivities, setSourceActivities] = useState<SourceActivityItem[]>(() => {
     const saved = localStorage.getItem('forward_activities_v1');
     return saved ? JSON.parse(saved) : INITIAL_SOURCE_ACTIVITIES;
+  });
+
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem('forward_profile_v1');
+    return saved ? JSON.parse(saved) : INITIAL_USER_PROFILE;
+  });
+
+  const [notifications, setNotifications] = useState<NotificationSettings>(() => {
+    const saved = localStorage.getItem('forward_notifications_v1');
+    return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
+  });
+
+  const [preferences, setPreferences] = useState<UserPreferences>(() => {
+    const saved = localStorage.getItem('forward_preferences_v1');
+    return saved ? JSON.parse(saved) : INITIAL_PREFERENCES;
   });
 
   // Navigation & Search State
@@ -116,6 +138,33 @@ export function App() {
     localStorage.setItem('forward_activities_v1', JSON.stringify(sourceActivities));
   }, [sourceActivities]);
 
+  useEffect(() => {
+    localStorage.setItem('forward_profile_v1', JSON.stringify(userProfile));
+  }, [userProfile]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_notifications_v1', JSON.stringify(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_preferences_v1', JSON.stringify(preferences));
+
+    // Theme application to documentElement
+    const theme = preferences.theme;
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (theme === 'light') {
+      document.documentElement.removeAttribute('data-theme');
+    } else if (theme === 'system') {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    }
+  }, [preferences]);
+
   // Global Escape key listener to dismiss open modals or dropdowns
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -158,12 +207,18 @@ export function App() {
     localStorage.removeItem('forward_moves_v2');
     localStorage.removeItem('forward_sources_v1');
     localStorage.removeItem('forward_activities_v1');
+    localStorage.removeItem('forward_profile_v1');
+    localStorage.removeItem('forward_notifications_v1');
+    localStorage.removeItem('forward_preferences_v1');
     setEvents(INITIAL_EVENTS);
     setAttentionItems(INITIAL_ATTENTION_ITEMS);
     setRecentlyAdded(INITIAL_RECENTLY_ADDED);
     setNextMoves(INITIAL_NEXT_MOVES);
     setSources(INITIAL_SOURCES);
     setSourceActivities(INITIAL_SOURCE_ACTIVITIES);
+    setUserProfile(INITIAL_USER_PROFILE);
+    setNotifications(INITIAL_NOTIFICATIONS);
+    setPreferences(INITIAL_PREFERENCES);
     addToast('info', 'Prototype Reset', 'Restored default reference dashboard state.');
   };
 
@@ -641,6 +696,65 @@ export function App() {
     addToast('success', 'Events Imported', `Added 1 new event from ${sourceName} to your timeline.`);
   };
 
+  const handleUpdateProfile = (updated: UserProfile) => {
+    setUserProfile(updated);
+  };
+
+  const handleUpdateNotifications = (updated: NotificationSettings) => {
+    setNotifications(updated);
+  };
+
+  const handleUpdatePreferences = (updated: UserPreferences) => {
+    setPreferences(updated);
+  };
+
+  const handleDownloadData = () => {
+    try {
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        application: 'FORWARD — Campus Timeline & Opportunity Hub',
+        user: userProfile,
+        preferences,
+        notifications,
+        timelineEvents: events,
+        attentionItems,
+        nextMoveTasks: nextMoves,
+        connectedSources: sources,
+        sourceActivities
+      };
+
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `forward_user_data_export_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      addToast('success', 'Data Export Ready', 'Downloaded your events, sources, and preferences JSON.');
+    } catch {
+      addToast('warning', 'Export Failed', 'Unable to create downloadable export.');
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    localStorage.clear();
+    setEvents(INITIAL_EVENTS);
+    setAttentionItems(INITIAL_ATTENTION_ITEMS);
+    setRecentlyAdded(INITIAL_RECENTLY_ADDED);
+    setNextMoves(INITIAL_NEXT_MOVES);
+    setSources(INITIAL_SOURCES);
+    setSourceActivities(INITIAL_SOURCE_ACTIVITIES);
+    setUserProfile(INITIAL_USER_PROFILE);
+    setNotifications(INITIAL_NOTIFICATIONS);
+    setPreferences(INITIAL_PREFERENCES);
+    setActiveView('overview');
+    addToast('info', 'Account Reset', 'All personalized data was cleared and default demo restored.');
+  };
+
   return (
     <div className="app-layout">
       {/* 1. Left Sidebar */}
@@ -649,6 +763,7 @@ export function App() {
         setActiveView={setActiveView}
         onOpenCapture={() => setActiveView('add-event')}
         conflictCount={unresolvedAttentionCount}
+        userProfile={userProfile}
         onProfileMenuClick={() => setIsProfileOpen(true)}
       />
 
@@ -664,6 +779,8 @@ export function App() {
           setIsProfileOpen={setIsProfileOpen}
           onResetDemoData={handleResetDemoData}
           onSelectNotificationItem={(eventId) => setDetailEventId(eventId)}
+          userProfile={userProfile}
+          onOpenSettings={() => setActiveView('settings')}
         />
 
         {/* Dynamic Page Views */}
@@ -799,41 +916,18 @@ export function App() {
 
           {/* View: Settings */}
           {activeView === 'settings' && (
-            <div style={{ maxWidth: '640px' }}>
-              <div style={{ marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>Settings & Demo Controls</h1>
-                <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
-                  Manage student profile preferences and prototype testing parameters.
-                </p>
-              </div>
-
-              <div style={{ background: '#ffffff', border: '1px solid #e9edf2', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>Active Demo Date</label>
-                  <p style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px' }}>Aligned with Hackathon reference evaluation date.</p>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value="14 October 2026"
-                    disabled
-                    style={{ background: '#f8fafc', color: '#64748b' }}
-                  />
-                </div>
-
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>Reset Prototype State</label>
-                  <p style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '12px' }}>
-                    Restores default 12 opportunities, 3 attention alerts, and 5 next move tasks from reference.
-                  </p>
-                  <button
-                    className="btn-secondary"
-                    onClick={handleResetDemoData}
-                  >
-                    Restore Reference Mock Data
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SettingsView
+              userProfile={userProfile}
+              notifications={notifications}
+              preferences={preferences}
+              onUpdateProfile={handleUpdateProfile}
+              onUpdateNotifications={handleUpdateNotifications}
+              onUpdatePreferences={handleUpdatePreferences}
+              onResetDemoData={handleResetDemoData}
+              onDownloadData={handleDownloadData}
+              onDeleteAccount={handleDeleteAccount}
+              addToast={addToast}
+            />
           )}
         </div>
       </div>
