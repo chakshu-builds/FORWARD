@@ -46,6 +46,7 @@ import { EventDetailModal } from './components/EventDetailModal';
 import { ConflictModal } from './components/ConflictModal';
 import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
+import { BackgroundSnippets } from './components/ui/background-snippets';
 
 export function App() {
   // Clean up legacy mock data storage keys once to guarantee real dataset is used
@@ -791,7 +792,9 @@ export function App() {
       />
 
       {/* 2. Main Viewport */}
-      <div className="app-main-viewport">
+      <div className="app-main-viewport relative">
+        <BackgroundSnippets />
+
         {/* Top Search & Profile Bar */}
         <TopHeader
           searchQuery={searchQuery}
