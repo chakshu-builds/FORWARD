@@ -123,3 +123,32 @@ export interface RecentlyAddedItem {
 }
 
 export type ActiveView = 'overview' | 'timeline' | 'add-event' | 'needs-review' | 'sources' | 'settings' | 'dashboard' | 'all-events';
+
+export type SourceStatus = 'Connected' | 'Syncing' | 'Disconnected' | 'Error';
+
+export interface SourceItem {
+  id: string;
+  name: string;
+  description: string;
+  categories: string[];
+  status: SourceStatus;
+  lastSyncedText: string;
+  eventsFoundCount: number;
+  autoSyncEnabled: boolean;
+  sourceType: 'platform' | 'website' | 'rss' | 'portal';
+  url?: string;
+  logoType: string;
+}
+
+export type EventSource = SourceItem;
+
+export interface SourceActivityItem {
+  id: string;
+  sourceName: string;
+  logoType: string;
+  actionText: string;
+  timeAgo: string;
+  status: 'success' | 'warning' | 'error' | 'info';
+}
+
+export type SourceActivity = SourceActivityItem;

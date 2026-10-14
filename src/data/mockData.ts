@@ -1,4 +1,4 @@
-import type { EventItem, ExtractionDraft, AttentionItem, RecentlyAddedItem, PrepTask } from '../types';
+import type { EventItem, ExtractionDraft, AttentionItem, RecentlyAddedItem, PrepTask, SourceItem, SourceActivityItem } from '../types';
 
 export const INITIAL_EVENTS: EventItem[] = [
   {
@@ -672,3 +672,127 @@ export const SAMPLE_EXTRACTION_RESULT: ExtractionDraft = {
   lowConfidenceFields: ['reportingTime'],
   detectedConflictNotice: 'Venue discrepancy: Current record indicates "Main Auditorium, 09:00 AM". New notice specifies "Tech Park Innovation Hall 3, 08:30 AM".'
 };
+
+export const INITIAL_SOURCES: SourceItem[] = [
+  {
+    id: 'src-unstop',
+    name: 'Unstop',
+    description: 'Hackathons, competitions, internships and more',
+    categories: ['Jobs', 'Competitions', 'Internships'],
+    status: 'Connected',
+    lastSyncedText: '2 hours ago',
+    eventsFoundCount: 12,
+    autoSyncEnabled: true,
+    sourceType: 'platform',
+    url: 'https://unstop.com',
+    logoType: 'unstop'
+  },
+  {
+    id: 'src-devfolio',
+    name: 'Devfolio',
+    description: 'Hackathons and builder programmes',
+    categories: ['Hackathons', 'Competitions'],
+    status: 'Connected',
+    lastSyncedText: '5 hours ago',
+    eventsFoundCount: 8,
+    autoSyncEnabled: true,
+    sourceType: 'platform',
+    url: 'https://devfolio.co',
+    logoType: 'devfolio'
+  },
+  {
+    id: 'src-google-developers',
+    name: 'Google Developers',
+    description: 'Developer events, workshops and community programmes',
+    categories: ['Workshops', 'Conferences', 'Community'],
+    status: 'Connected',
+    lastSyncedText: '1 day ago',
+    eventsFoundCount: 7,
+    autoSyncEnabled: true,
+    sourceType: 'platform',
+    url: 'https://developers.google.com/community',
+    logoType: 'google-developers'
+  },
+  {
+    id: 'src-linkedin',
+    name: 'LinkedIn',
+    description: 'Internships, jobs and career opportunities',
+    categories: ['Internships', 'Jobs', 'Career'],
+    status: 'Connected',
+    lastSyncedText: '1 day ago',
+    eventsFoundCount: 6,
+    autoSyncEnabled: true,
+    sourceType: 'platform',
+    url: 'https://linkedin.com/jobs',
+    logoType: 'linkedin'
+  },
+  {
+    id: 'src-college-portals',
+    name: 'College Event Portals',
+    description: "Your college's official event portal",
+    categories: ['College Events', 'Workshops', 'Fests'],
+    status: 'Connected',
+    lastSyncedText: '2 days ago',
+    eventsFoundCount: 9,
+    autoSyncEnabled: true,
+    sourceType: 'portal',
+    url: 'https://campus.edu/events',
+    logoType: 'college-portal'
+  },
+  {
+    id: 'src-custom-website',
+    name: 'Custom Website',
+    description: 'Add any event website with an RSS feed',
+    categories: ['Custom'],
+    status: 'Disconnected',
+    lastSyncedText: '5 days ago',
+    eventsFoundCount: 0,
+    autoSyncEnabled: false,
+    sourceType: 'website',
+    url: 'https://tech-events.blog/feed.xml',
+    logoType: 'custom-website'
+  }
+];
+
+export const INITIAL_SOURCE_ACTIVITIES: SourceActivityItem[] = [
+  {
+    id: 'act-1',
+    sourceName: 'Unstop',
+    logoType: 'unstop',
+    actionText: '12 new events found',
+    timeAgo: '2 hours ago',
+    status: 'success'
+  },
+  {
+    id: 'act-2',
+    sourceName: 'Devfolio',
+    logoType: 'devfolio',
+    actionText: 'Sync completed',
+    timeAgo: '5 hours ago',
+    status: 'success'
+  },
+  {
+    id: 'act-3',
+    sourceName: 'Google Developers',
+    logoType: 'google-developers',
+    actionText: '7 new events found',
+    timeAgo: '1 day ago',
+    status: 'success'
+  },
+  {
+    id: 'act-4',
+    sourceName: 'LinkedIn',
+    logoType: 'linkedin',
+    actionText: 'Sync completed',
+    timeAgo: '1 day ago',
+    status: 'success'
+  },
+  {
+    id: 'act-5',
+    sourceName: 'Custom Website',
+    logoType: 'custom-website',
+    actionText: 'Sync failed',
+    timeAgo: '5 days ago',
+    status: 'warning'
+  }
+];

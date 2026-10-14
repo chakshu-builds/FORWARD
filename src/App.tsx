@@ -6,14 +6,18 @@ import type {
   ActiveView,
   AttentionItem,
   RecentlyAddedItem,
-  PrepTask
+  PrepTask,
+  SourceItem,
+  SourceActivityItem
 } from './types';
 import {
   INITIAL_EVENTS,
   INITIAL_ATTENTION_ITEMS,
   INITIAL_RECENTLY_ADDED,
   INITIAL_NEXT_MOVES,
-  SAMPLE_EXTRACTION_RESULT
+  SAMPLE_EXTRACTION_RESULT,
+  INITIAL_SOURCES,
+  INITIAL_SOURCE_ACTIVITIES
 } from './data/mockData';
 import { Sidebar } from './components/Sidebar';
 import { TopHeader } from './components/TopHeader';
@@ -27,6 +31,7 @@ import { NextMovesPanel } from './components/NextMovesPanel';
 import { MyTimelineView } from './components/MyTimelineView';
 import { AddEventView } from './components/AddEventView';
 import { NeedsReviewView } from './components/NeedsReviewView';
+import { SourcesView } from './components/SourcesView';
 
 import { CaptureModal } from './components/CaptureModal';
 import { ExtractionReviewModal } from './components/ExtractionReviewModal';
@@ -34,7 +39,6 @@ import { EventDetailModal } from './components/EventDetailModal';
 import { ConflictModal } from './components/ConflictModal';
 import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
-import { CheckCircle2 } from 'lucide-react';
 
 export function App() {
   // Main Data States with localStorage persistence fallback
@@ -56,6 +60,16 @@ export function App() {
   const [nextMoves, setNextMoves] = useState<PrepTask[]>(() => {
     const saved = localStorage.getItem('forward_moves_v2');
     return saved ? JSON.parse(saved) : INITIAL_NEXT_MOVES;
+  });
+
+  const [sources, setSources] = useState<SourceItem[]>(() => {
+    const saved = localStorage.getItem('forward_sources_v1');
+    return saved ? JSON.parse(saved) : INITIAL_SOURCES;
+  });
+
+  const [sourceActivities, setSourceActivities] = useState<SourceActivityItem[]>(() => {
+    const saved = localStorage.getItem('forward_activities_v1');
+    return saved ? JSON.parse(saved) : INITIAL_SOURCE_ACTIVITIES;
   });
 
   // Navigation & Search State
@@ -93,6 +107,14 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('forward_moves_v2', JSON.stringify(nextMoves));
   }, [nextMoves]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_sources_v1', JSON.stringify(sources));
+  }, [sources]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_activities_v1', JSON.stringify(sourceActivities));
+  }, [sourceActivities]);
 
   // Global Escape key listener to dismiss open modals or dropdowns
   useEffect(() => {
@@ -134,10 +156,14 @@ export function App() {
     localStorage.removeItem('forward_attention_v2');
     localStorage.removeItem('forward_recent_v2');
     localStorage.removeItem('forward_moves_v2');
+    localStorage.removeItem('forward_sources_v1');
+    localStorage.removeItem('forward_activities_v1');
     setEvents(INITIAL_EVENTS);
     setAttentionItems(INITIAL_ATTENTION_ITEMS);
     setRecentlyAdded(INITIAL_RECENTLY_ADDED);
     setNextMoves(INITIAL_NEXT_MOVES);
+    setSources(INITIAL_SOURCES);
+    setSourceActivities(INITIAL_SOURCE_ACTIVITIES);
     addToast('info', 'Prototype Reset', 'Restored default reference dashboard state.');
   };
 
@@ -489,6 +515,132 @@ export function App() {
     setActiveView('needs-review');
   };
 
+  const handleAddSource = (newSource: SourceItem) => {
+    setSources((prev) => [newSource, ...prev]);
+    const newAct: SourceActivityItem = {
+      id: 'act-' + Date.now(),
+      sourceName: newSource.name,
+      logoType: newSource.logoType,
+      actionText: 'Source connected',
+      timeAgo: 'Just now',
+      status: 'success'
+    };
+    setSourceActivities((prev) => [newAct, ...prev]);
+    addToast('success', 'Source Added', `${newSource.name} has been connected.`);
+  };
+
+  const handleUpdateSource = (updated: SourceItem) => {
+    setSources((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+  };
+
+  const handleRemoveSource = (id: string) => {
+    const target = sources.find((s) => s.id === id);
+    setSources((prev) => prev.filter((s) => s.id !== id));
+    if (target) {
+      const newAct: SourceActivityItem = {
+        id: 'act-' + Date.now(),
+        sourceName: target.name,
+        logoType: target.logoType,
+        actionText: 'Source removed',
+        timeAgo: 'Just now',
+        status: 'warning'
+      };
+      setSourceActivities((prev) => [newAct, ...prev]);
+    }
+  };
+
+  const handleSyncSource = (id: string) => {
+    const target = sources.find((s) => s.id === id);
+    if (!target) return;
+
+    // Set syncing state
+    setSources((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: 'Syncing' as const } : s))
+    );
+
+    // Simulate real sync completion after 1.2s
+    setTimeout(() => {
+      const isFailed = target.id === 'src-6'; // Custom website test case
+      const newFoundCount = isFailed ? target.eventsFoundCount : target.eventsFoundCount + Math.floor(Math.random() * 3 + 1);
+
+      setSources((prev) =>
+        prev.map((s) => {
+          if (s.id === id) {
+            return {
+              ...s,
+              status: isFailed ? ('Disconnected' as const) : ('Connected' as const),
+              lastSyncedText: isFailed ? 'Sync failed (timeout)' : 'Just now',
+              eventsFoundCount: newFoundCount
+            };
+          }
+          return s;
+        })
+      );
+
+      const newAct: SourceActivityItem = {
+        id: 'act-' + Date.now(),
+        sourceName: target.name,
+        logoType: target.logoType,
+        actionText: isFailed ? 'Sync failed' : `${newFoundCount - target.eventsFoundCount} new events found`,
+        timeAgo: 'Just now',
+        status: isFailed ? 'error' : 'success'
+      };
+      setSourceActivities((prev) => [newAct, ...prev]);
+
+      if (isFailed) {
+        addToast('warning', 'Sync Failed', `${target.name}: RSS endpoint timed out. Check URL.`);
+      } else {
+        addToast('success', 'Sync Completed', `${target.name}: Discovered ${newFoundCount - target.eventsFoundCount} new opportunities.`);
+      }
+    }, 1200);
+  };
+
+  const handleImportDiscoveredEvents = (sourceName: string) => {
+    const importedEvents: EventItem[] = [
+      {
+        id: 'disc-' + Date.now() + '-1',
+        title: `${sourceName} Innovation Challenge 2026`,
+        organizer: sourceName,
+        category: 'Hackathons',
+        eventStartDate: '2026-11-15T09:00:00',
+        dateLabel: { month: 'NOV', day: '15' },
+        timeRange: '9:00 AM – 6:00 PM',
+        venue: 'Main Campus Hall & Online',
+        isOnline: false,
+        registrationUrl: 'https://unstop.com',
+        summary: `Auto-discovered opportunity from ${sourceName} feed.`,
+        status: 'Interested',
+        registrationDeadline: '2026-11-10T23:59:59',
+        daysRemaining: 27,
+        tags: ['Hackathon', 'Builder', 'Team'],
+        sourceNotice: {
+          id: 'sn-disc-1',
+          channel: 'Web Link',
+          receivedAt: 'Just now',
+          senderOrSource: sourceName,
+          rawSnippet: 'Official event announcement verified from sync channel.',
+          confidenceScore: 0.95
+        },
+        tasks: [
+          { id: 't1', title: 'Form team of 4 members', dueDate: '2026-11-05', completed: false, priority: 'High' }
+        ],
+        changeHistory: [
+          {
+            id: 'ch-1',
+            timestamp: 'Just now',
+            changeType: 'Created',
+            description: `Auto-discovered and imported via ${sourceName} sync`,
+            actor: 'Reconciliation Engine'
+          }
+        ],
+        thumbnailType: 'hackathon'
+      }
+    ];
+
+    setEvents((prev) => [...importedEvents, ...prev]);
+    addToast('success', 'Events Imported', `Added 1 new event from ${sourceName} to your timeline.`);
+  };
+
   return (
     <div className="app-layout">
       {/* 1. Left Sidebar */}
@@ -633,49 +785,16 @@ export function App() {
 
           {/* View: Sources */}
           {activeView === 'sources' && (
-            <div>
-              <div style={{ marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>Campus Feeds & Sources</h1>
-                <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
-                  Channels forwarding event announcements and flyers to your FORWARD pipeline.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                {[
-                  { name: 'VIPS Tech Circle Official', channel: 'WhatsApp', notices: 14, active: true },
-                  { name: 'University Placement Cell (TPC)', channel: 'Email', notices: 8, active: true },
-                  { name: 'GDSC Delhi Announcements', channel: 'Discord', notices: 23, active: true },
-                  { name: 'IIT Delhi Academic Hub', channel: 'PDF Circulars', notices: 6, active: true },
-                  { name: 'Unstop & Devfolio Portals', channel: 'Web RSS', notices: 19, active: true }
-                ].map((src, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #e9edf2',
-                      borderRadius: '12px',
-                      padding: '18px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{src.name}</strong>
-                      <span className="event-tag-pill">{src.channel}</span>
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                      {src.notices} circulars ingested and verified
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#059669', marginTop: '6px' }}>
-                      <CheckCircle2 size={13} />
-                      <span>Active sync connection</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SourcesView
+              sources={sources}
+              activities={sourceActivities}
+              onAddSource={handleAddSource}
+              onUpdateSource={handleUpdateSource}
+              onRemoveSource={handleRemoveSource}
+              onSyncSource={handleSyncSource}
+              onImportDiscoveredEvents={handleImportDiscoveredEvents}
+              addToast={addToast}
+            />
           )}
 
           {/* View: Settings */}
