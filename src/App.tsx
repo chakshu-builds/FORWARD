@@ -24,6 +24,7 @@ import { NeedsAttentionCard } from './components/NeedsAttentionCard';
 import { RecentlyAddedCard } from './components/RecentlyAddedCard';
 import { CalendarPanel } from './components/CalendarPanel';
 import { NextMovesPanel } from './components/NextMovesPanel';
+import { MyTimelineView } from './components/MyTimelineView';
 
 import { CaptureModal } from './components/CaptureModal';
 import { ExtractionReviewModal } from './components/ExtractionReviewModal';
@@ -33,8 +34,7 @@ import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
 import {
   AlertCircle,
-  CheckCircle2,
-  ArrowRight
+  CheckCircle2
 } from 'lucide-react';
 
 export function App() {
@@ -74,10 +74,6 @@ export function App() {
   const [extractionDraft, setExtractionDraft] = useState<ExtractionDraft>(SAMPLE_EXTRACTION_RESULT);
   const [detailEventId, setDetailEventId] = useState<string | null>(null);
   const [conflictEventId, setConflictEventId] = useState<string | null>(null);
-
-  // Filter state for My Timeline view
-  const [timelineCategory, setTimelineCategory] = useState<string>('All');
-  const [timelineStatus, setTimelineStatus] = useState<string>('All');
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -381,6 +377,16 @@ export function App() {
     addToast('info', 'Status Updated', `Event marked as "${newStatus}"`);
   };
 
+  const handleRemoveEvent = (eventId: string) => {
+    const target = events.find((e) => e.id === eventId);
+    setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    setAttentionItems((prev) => prev.filter((a) => a.eventId !== eventId));
+    setRecentlyAdded((prev) => prev.filter((r) => r.eventId !== eventId));
+    if (target) {
+      addToast('info', 'Event Removed', `"${target.title}" was removed from your timeline.`);
+    }
+  };
+
   const handleAttentionItemClick = (item: AttentionItem) => {
     if (item.type === 'conflict') {
       const evt = events.find((e) => e.id === item.eventId);
@@ -438,14 +444,9 @@ export function App() {
                 registeredCount={events.filter((e) => e.status === 'Registered').length}
                 onCardClick={(type) => {
                   if (type === 'upcoming') setActiveView('timeline');
-                  else if (type === 'deadlines') {
-                    setActiveView('timeline');
-                    setTimelineStatus('In Progress');
-                  } else if (type === 'needs-review') setActiveView('needs-review');
-                  else if (type === 'registered') {
-                    setActiveView('timeline');
-                    setTimelineStatus('Registered');
-                  }
+                  else if (type === 'deadlines') setActiveView('timeline');
+                  else if (type === 'needs-review') setActiveView('needs-review');
+                  else if (type === 'registered') setActiveView('timeline');
                 }}
               />
 
@@ -509,120 +510,15 @@ export function App() {
 
           {/* View: My Timeline */}
           {activeView === 'timeline' && (
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <div>
-                  <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>My Timeline</h1>
-                  <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
-                    All verified campus opportunities sorted by chronological cutoff dates.
-                  </p>
-                </div>
-                <button
-                  className="btn-primary"
-                  onClick={() => setIsCaptureOpen(true)}
-                >
-                  + Add Event
-                </button>
-              </div>
-
-              {/* Filters */}
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                <select
-                  value={timelineCategory}
-                  onChange={(e) => setTimelineCategory(e.target.value)}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    fontSize: '0.85rem'
-                  }}
-                >
-                  <option value="All">All Categories</option>
-                  <option value="Hackathons">Hackathons</option>
-                  <option value="Competitions">Competitions</option>
-                  <option value="Workshops">Workshops</option>
-                  <option value="Internships">Internships</option>
-                  <option value="Conferences">Conferences</option>
-                </select>
-
-                <select
-                  value={timelineStatus}
-                  onChange={(e) => setTimelineStatus(e.target.value)}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    fontSize: '0.85rem'
-                  }}
-                >
-                  <option value="All">All Statuses</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Registered">Registered</option>
-                  <option value="Interested">Interested</option>
-                  <option value="Open">Open</option>
-                </select>
-
-                {(timelineCategory !== 'All' || timelineStatus !== 'All') && (
-                  <button
-                    className="btn-secondary btn-sm"
-                    onClick={() => {
-                      setTimelineCategory('All');
-                      setTimelineStatus('All');
-                    }}
-                  >
-                    Reset Filters
-                  </button>
-                )}
-              </div>
-
-              {/* List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {searchedEvents
-                  .filter((e) => (timelineCategory === 'All' ? true : e.category.includes(timelineCategory)))
-                  .filter((e) => (timelineStatus === 'All' ? true : e.status === timelineStatus))
-                  .map((evt) => (
-                    <div
-                      key={evt.id}
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #e9edf2',
-                        borderRadius: '12px',
-                        padding: '16px 20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setDetailEventId(evt.id)}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div className="event-date-box">
-                          <span className="event-date-month">{evt.dateLabel?.month || 'OCT'}</span>
-                          <span className="event-date-day">{evt.dateLabel?.day || '14'}</span>
-                        </div>
-                        <div>
-                          <strong style={{ fontSize: '0.98rem', color: '#0f172a' }}>{evt.title}</strong>
-                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{evt.organizer} · {evt.venue}</div>
-                          <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                            {evt.tags.map((t) => (
-                              <span key={t} className="event-tag-pill">{t}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span className={`status-badge badge-${evt.status.toLowerCase().replace(' ', '-')}`}>
-                          {evt.status}
-                        </span>
-                        <ArrowRight size={16} color="#94a3b8" />
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
+            <MyTimelineView
+              events={searchedEvents}
+              nextMoves={nextMoves}
+              onOpenAddEvent={() => setIsCaptureOpen(true)}
+              onSelectEvent={(evt) => setDetailEventId(evt.id)}
+              onUpdateStatus={handleUpdateStatus}
+              onRemoveEvent={handleRemoveEvent}
+              onToggleNextMove={handleToggleNextMove}
+            />
           )}
 
           {/* View: Needs Review */}

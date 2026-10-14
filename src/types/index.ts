@@ -1,4 +1,4 @@
-export type EventStatus = 'Registered' | 'Interested' | 'In Progress' | 'Submitted' | 'Open';
+export type EventStatus = 'Registered' | 'Interested' | 'In Progress' | 'Submitted' | 'Open' | 'Not Registered' | 'Completed';
 
 export type EventCategory = 'Hackathons' | 'Workshops' | 'Competitions' | 'Internships' | 'Conferences' | 'Hackathon' | 'Workshop' | 'Competition' | 'Internship' | 'Conference';
 
@@ -70,6 +70,9 @@ export interface EventItem {
   conflict?: EventConflict;
   tags: string[];
   daysRemaining: number;
+  deadlineFormatted?: string;
+  deadlineDaysLeft?: number;
+  timelineGroup?: 'Today' | 'Tomorrow' | 'This Week' | 'Later This Month' | 'Past Events';
   isUrgent?: boolean;
   createdAt?: string;
 }

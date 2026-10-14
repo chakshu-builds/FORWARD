@@ -31,6 +31,25 @@ export const EventThumbnail: React.FC<EventThumbnailProps> = ({ type, size = 44,
           <line x1="22" y1="13" x2="22" y2="35" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="2 2" />
         </svg>
       );
+    case 'ai-good':
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 44 44"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={className}
+          style={{ borderRadius: `${radius}px`, flexShrink: 0 }}
+        >
+          <rect width="44" height="44" rx={radius} fill="#091e3a" />
+          <path d="M22 10C16 10 12 14.5 12 20C12 24.5 15 28 18 29.5V34H26V29.5C29 28 32 24.5 32 20C32 14.5 28 10 22 10Z" fill="#1e40af" opacity="0.6" />
+          <circle cx="22" cy="19" r="5" stroke="#38bdf8" strokeWidth="1.8" />
+          <path d="M22 12V14M22 24V26M15 19H17M27 19H29" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="22" cy="19" r="1.5" fill="#38bdf8" />
+          <path d="M19 32H25" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      );
 
     case 'unstop-ui':
       return (
