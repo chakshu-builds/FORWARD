@@ -113,4 +113,4 @@ export interface RecentlyAddedItem {
   thumbnailType: string;
 }
 
-export type ActiveView = 'overview' | 'timeline' | 'needs-review' | 'sources' | 'settings' | 'dashboard' | 'all-events';
+export type ActiveView = 'overview' | 'timeline' | 'add-event' | 'needs-review' | 'sources' | 'settings' | 'dashboard' | 'all-events';

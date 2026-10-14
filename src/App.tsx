@@ -25,6 +25,7 @@ import { RecentlyAddedCard } from './components/RecentlyAddedCard';
 import { CalendarPanel } from './components/CalendarPanel';
 import { NextMovesPanel } from './components/NextMovesPanel';
 import { MyTimelineView } from './components/MyTimelineView';
+import { AddEventView } from './components/AddEventView';
 
 import { CaptureModal } from './components/CaptureModal';
 import { ExtractionReviewModal } from './components/ExtractionReviewModal';
@@ -387,6 +388,20 @@ export function App() {
     }
   };
 
+  const handleAddNewEvent = (newEvent: EventItem) => {
+    setEvents((prev) => [newEvent, ...prev]);
+    const recentItem: RecentlyAddedItem = {
+      id: 'rec-' + Date.now(),
+      title: newEvent.title,
+      organizer: newEvent.organizer,
+      eventId: newEvent.id,
+      timeAgo: 'Just now',
+      thumbnailType: newEvent.thumbnailType || 'default'
+    };
+    setRecentlyAdded((prev) => [recentItem, ...prev]);
+    setActiveView('timeline');
+  };
+
   const handleAttentionItemClick = (item: AttentionItem) => {
     if (item.type === 'conflict') {
       const evt = events.find((e) => e.id === item.eventId);
@@ -406,7 +421,7 @@ export function App() {
       <Sidebar
         activeView={activeView}
         setActiveView={setActiveView}
-        onOpenCapture={() => setIsCaptureOpen(true)}
+        onOpenCapture={() => setActiveView('add-event')}
         conflictCount={pendingConflicts.length}
         onProfileMenuClick={() => setIsProfileOpen(true)}
       />
@@ -431,7 +446,7 @@ export function App() {
             <>
               {/* Greeting Header */}
               <GreetingHeader
-                onOpenAddEvent={() => setIsCaptureOpen(true)}
+                onOpenAddEvent={() => setActiveView('add-event')}
                 dateString="Tue, 14 Oct 2026"
                 userName="Chakshu"
               />
@@ -513,11 +528,21 @@ export function App() {
             <MyTimelineView
               events={searchedEvents}
               nextMoves={nextMoves}
-              onOpenAddEvent={() => setIsCaptureOpen(true)}
+              onOpenAddEvent={() => setActiveView('add-event')}
               onSelectEvent={(evt) => setDetailEventId(evt.id)}
               onUpdateStatus={handleUpdateStatus}
               onRemoveEvent={handleRemoveEvent}
               onToggleNextMove={handleToggleNextMove}
+            />
+          )}
+
+          {/* View: Add Event */}
+          {activeView === 'add-event' && (
+            <AddEventView
+              onClose={() => setActiveView('overview')}
+              onSaveEvent={handleAddNewEvent}
+              existingEvents={events}
+              addToast={addToast}
             />
           )}
 

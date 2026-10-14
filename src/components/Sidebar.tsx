@@ -56,10 +56,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
 
         <button
-          className="sidebar-nav-item"
-          onClick={onOpenCapture}
+          className={`sidebar-nav-item ${activeView === 'add-event' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveView('add-event');
+            if (onOpenCapture) onOpenCapture();
+          }}
         >
-          <CirclePlus size={18} strokeWidth={1.8} />
+          <CirclePlus size={18} strokeWidth={activeView === 'add-event' ? 2.2 : 1.8} />
           <span>Add Event</span>
         </button>
 
