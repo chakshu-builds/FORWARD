@@ -26,6 +26,7 @@ import { CalendarPanel } from './components/CalendarPanel';
 import { NextMovesPanel } from './components/NextMovesPanel';
 import { MyTimelineView } from './components/MyTimelineView';
 import { AddEventView } from './components/AddEventView';
+import { NeedsReviewView } from './components/NeedsReviewView';
 
 import { CaptureModal } from './components/CaptureModal';
 import { ExtractionReviewModal } from './components/ExtractionReviewModal';
@@ -33,10 +34,7 @@ import { EventDetailModal } from './components/EventDetailModal';
 import { ConflictModal } from './components/ConflictModal';
 import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
-import {
-  AlertCircle,
-  CheckCircle2
-} from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 export function App() {
   // Main Data States with localStorage persistence fallback
@@ -402,17 +400,93 @@ export function App() {
     setActiveView('timeline');
   };
 
-  const handleAttentionItemClick = (item: AttentionItem) => {
-    if (item.type === 'conflict') {
-      const evt = events.find((e) => e.id === item.eventId);
-      if (evt && evt.conflict) {
-        setConflictEventId(evt.id);
-      } else {
-        setDetailEventId(item.eventId);
-      }
-    } else {
-      setDetailEventId(item.eventId);
+  const unresolvedAttentionCount = useMemo(
+    () => attentionItems.filter((item) => item.status !== 'resolved').length,
+    [attentionItems]
+  );
+
+  const handleResolveAttentionIssue = (
+    issueId: string,
+    action: string,
+    details?: {
+      rescheduledDate?: string;
+      rescheduledStartTime?: string;
+      rescheduledEndTime?: string;
+      venue?: string;
+      mode?: 'Online' | 'In-Person' | 'Hybrid';
+      meetingUrl?: string;
+      acceptedValue?: string;
     }
+  ) => {
+    setAttentionItems((prev) =>
+      prev.map((item) => {
+        if (item.id === issueId) {
+          return { ...item, status: 'resolved' };
+        }
+        return item;
+      })
+    );
+
+    const targetItem = attentionItems.find((i) => i.id === issueId);
+    if (!targetItem) return;
+
+    if (action === 'reschedule' && details?.rescheduledDate) {
+      setEvents((prev) =>
+        prev.map((evt) => {
+          if (evt.id === targetItem.eventId) {
+            const parsedDate = new Date(details.rescheduledDate!);
+            const monthStr = parsedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+            const dayStr = String(parsedDate.getDate());
+            return {
+              ...evt,
+              eventStartDate: `${details.rescheduledDate}T09:00:00`,
+              dateLabel: { month: monthStr, day: dayStr },
+              timeRange:
+                details.rescheduledStartTime && details.rescheduledEndTime
+                  ? `${details.rescheduledStartTime} – ${details.rescheduledEndTime}`
+                  : evt.timeRange,
+              timelineGroup: 'Later This Month',
+              conflict: undefined,
+            };
+          }
+          return evt;
+        })
+      );
+    } else if (action === 'add_venue' && details?.venue) {
+      setEvents((prev) =>
+        prev.map((evt) => {
+          if (evt.id === targetItem.eventId) {
+            return {
+              ...evt,
+              venue: details.venue!,
+              isOnline: details.mode === 'Online',
+            };
+          }
+          return evt;
+        })
+      );
+    } else if (action === 'accept_update' && details?.acceptedValue) {
+      setEvents((prev) =>
+        prev.map((evt) => {
+          if (evt.id === targetItem.eventId) {
+            return {
+              ...evt,
+              registrationDeadline: `${details.acceptedValue}T23:59:00`,
+              deadlineFormatted: details.acceptedValue,
+            };
+          }
+          return evt;
+        })
+      );
+    }
+  };
+
+  const handleUpdateEvent = (updatedEvent: EventItem) => {
+    setEvents((prev) => prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e)));
+  };
+
+  const handleAttentionItemClick = (_item: AttentionItem) => {
+    setActiveView('needs-review');
   };
 
   return (
@@ -422,7 +496,7 @@ export function App() {
         activeView={activeView}
         setActiveView={setActiveView}
         onOpenCapture={() => setActiveView('add-event')}
-        conflictCount={pendingConflicts.length}
+        conflictCount={unresolvedAttentionCount}
         onProfileMenuClick={() => setIsProfileOpen(true)}
       />
 
@@ -455,7 +529,7 @@ export function App() {
               <MetricsRow
                 upcomingCount={12}
                 deadlinesCount={5}
-                needsReviewCount={pendingConflicts.length}
+                needsReviewCount={unresolvedAttentionCount}
                 registeredCount={events.filter((e) => e.status === 'Registered').length}
                 onCardClick={(type) => {
                   if (type === 'upcoming') setActiveView('timeline');
@@ -548,78 +622,13 @@ export function App() {
 
           {/* View: Needs Review */}
           {activeView === 'needs-review' && (
-            <div>
-              <div style={{ marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>Needs Review Workspace</h1>
-                <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
-                  Notices flagged for date shifts, venue changes, or ambiguous reporting requirements.
-                </p>
-              </div>
-
-              {pendingConflicts.length === 0 ? (
-                <div style={{ padding: '3rem', textAlign: 'center', background: '#ffffff', borderRadius: '12px', border: '1px solid #e9edf2' }}>
-                  <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 12px auto' }} />
-                  <h3 style={{ fontSize: '1.1rem', color: '#0f172a' }}>All Notices Reconciled</h3>
-                  <p style={{ color: '#64748b', fontSize: '0.85rem' }}>No discrepancies detected across your campus feeds.</p>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {pendingConflicts.map((evt) => {
-                    const conf = evt.conflict;
-                    if (!conf) return null;
-                    return (
-                      <div
-                        key={evt.id}
-                        style={{
-                          background: '#ffffff',
-                          border: '1px solid #fee2e2',
-                          borderRadius: '12px',
-                          padding: '20px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '12px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div className="attention-icon-box bg-red-tint">
-                              <AlertCircle size={20} className="text-red" />
-                            </div>
-                            <div>
-                              <strong style={{ fontSize: '1rem', color: '#0f172a' }}>{evt.title}</strong>
-                              <span style={{ fontSize: '0.8rem', color: '#dc2626', marginLeft: '10px' }}>
-                                Conflicting field: <strong>{conf.fieldLabel}</strong>
-                              </span>
-                            </div>
-                          </div>
-
-                          <button
-                            className="btn-primary btn-sm"
-                            onClick={() => setConflictEventId(evt.id)}
-                          >
-                            Resolve Discrepancy
-                          </button>
-                        </div>
-
-                        <div className="conflict-comparison-grid">
-                          <div className="comparison-box">
-                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>CURRENT VALUE</span>
-                            <strong style={{ color: '#dc2626' }}>{conf.currentValue}</strong>
-                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Source: {conf.currentSource}</span>
-                          </div>
-
-                          <div className="comparison-box incoming">
-                            <span style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>NEWLY DETECTED UPDATE</span>
-                            <strong style={{ color: '#059669' }}>{conf.newValue}</strong>
-                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Source: {conf.newSource}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <NeedsReviewView
+              attentionItems={attentionItems}
+              events={events}
+              onResolveIssue={handleResolveAttentionIssue}
+              onUpdateEvent={handleUpdateEvent}
+              addToast={addToast}
+            />
           )}
 
           {/* View: Sources */}

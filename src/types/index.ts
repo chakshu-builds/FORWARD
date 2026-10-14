@@ -101,7 +101,16 @@ export interface AttentionItem {
   eventTitle: string;
   eventId: string;
   timeAgo: string;
+  dateLabel?: { month: string; day: string };
   field?: string;
+  explanation?: string;
+  conflictingEventId?: string;
+  conflictingEventTitle?: string;
+  conflictingEventDate?: string;
+  conflictingEventTime?: string;
+  previousValue?: string;
+  proposedValue?: string;
+  status?: 'pending' | 'resolved';
 }
 
 export interface RecentlyAddedItem {

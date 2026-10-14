@@ -73,6 +73,8 @@ export const EventThumbnail: React.FC<EventThumbnailProps> = ({ type, size = 44,
       );
 
     case 'google-winter':
+    case 'google':
+    case 'google-g':
       return (
         <svg
           width={size}
@@ -83,13 +85,23 @@ export const EventThumbnail: React.FC<EventThumbnailProps> = ({ type, size = 44,
           className={className}
           style={{ borderRadius: `${radius}px`, flexShrink: 0 }}
         >
-          <rect width="44" height="44" rx={radius} fill="#0f2b48" />
-          {/* Snowy mountain peaks with blue ice sky */}
-          <path d="M4 38L18 16L32 38H4Z" fill="#1e3a8a" />
-          <path d="M18 16L24 25L18 28L12 25L18 16Z" fill="#93c5fd" />
-          <path d="M18 38L28 22L40 38H18Z" fill="#2563eb" />
-          <path d="M28 22L32 28L28 31L24 28L28 22Z" fill="#dbeafe" />
-          <circle cx="34" cy="12" r="3" fill="#60a5fa" opacity="0.8" />
+          <rect width="44" height="44" rx={radius} fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+          <path
+            d="M33.6 22.3c0-.8-.07-1.5-.2-2.3H22v4.5h6.6c-.3 1.5-1.1 2.8-2.4 3.7v3.1h3.9c2.3-2.1 3.5-5.2 3.5-9z"
+            fill="#4285F4"
+          />
+          <path
+            d="M22 34c3.2 0 6-1.1 8-3l-3.9-3.1c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.8-5h-4.1v3.2C13.1 31.3 17.2 34 22 34z"
+            fill="#34A853"
+          />
+          <path
+            d="M15.2 24.1c-.2-.7-.4-1.4-.4-2.1s.2-1.4.4-2.1v-3.2h-4.1C10.3 18.3 10 20.1 10 22s.3 3.7 1.1 5.3l4.1-3.2z"
+            fill="#FBBC05"
+          />
+          <path
+            d="M22 14c1.8 0 3.3.6 4.6 1.8l3.4-3.4C27.9 10.5 25.2 9.5 22 9.5c-4.8 0-8.9 2.7-10.9 6.7l4.1 3.2c1-2.9 3.7-5.4 6.8-5.4z"
+            fill="#EA4335"
+          />
         </svg>
       );
 
@@ -163,6 +175,26 @@ export const EventThumbnail: React.FC<EventThumbnailProps> = ({ type, size = 44,
           <circle cx="10" cy="14" r="1" fill="#f472b6" />
           <circle cx="34" cy="18" r="1.5" fill="#c084fc" />
           <circle cx="30" cy="30" r="1" fill="#e879f9" />
+        </svg>
+      );
+
+    case 'tech-conclave':
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 44 44"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={className}
+          style={{ borderRadius: `${radius}px`, flexShrink: 0 }}
+        >
+          <rect width="44" height="44" rx={radius} fill="#3b0764" />
+          <path d="M22 6L36 38H8L22 6Z" fill="#701a75" opacity="0.6" />
+          <path d="M22 10L32 36H12L22 10Z" fill="#a21caf" opacity="0.8" />
+          <circle cx="22" cy="18" r="4" fill="#f472b6" />
+          <path d="M19 28H25V36H19V28Z" fill="#fbcfe8" />
+          <line x1="22" y1="6" x2="22" y2="36" stroke="#fdf4ff" strokeWidth="1.2" />
         </svg>
       );
 

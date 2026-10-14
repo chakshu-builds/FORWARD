@@ -532,8 +532,15 @@ export const INITIAL_ATTENTION_ITEMS: AttentionItem[] = [
     title: 'Conflicting date detected',
     eventTitle: 'Developer Summit',
     eventId: 'evt-developer-summit',
-    timeAgo: '2h ago',
-    field: 'event_date'
+    dateLabel: { month: 'OCT', day: '25' },
+    timeAgo: '2 hours ago',
+    field: 'event_date',
+    explanation: 'This event overlaps with another event in your timeline.',
+    conflictingEventId: 'evt-research-symposium',
+    conflictingEventTitle: 'Research Symposium',
+    conflictingEventDate: '25 Oct 2026',
+    conflictingEventTime: '1:00 PM – 4:00 PM',
+    status: 'pending'
   },
   {
     id: 'att-2',
@@ -541,8 +548,11 @@ export const INITIAL_ATTENTION_ITEMS: AttentionItem[] = [
     title: 'Missing venue information',
     eventTitle: 'Tech Conclave 2026',
     eventId: 'evt-tech-conclave-2026',
-    timeAgo: '5h ago',
-    field: 'venue'
+    dateLabel: { month: 'OCT', day: '28' },
+    timeAgo: '5 hours ago',
+    field: 'venue',
+    explanation: 'Venue not specified. Please add the venue or online link.',
+    status: 'pending'
   },
   {
     id: 'att-3',
@@ -550,7 +560,13 @@ export const INITIAL_ATTENTION_ITEMS: AttentionItem[] = [
     title: 'New update available',
     eventTitle: 'Google Winter Internship',
     eventId: 'evt-google-winter-internship',
-    timeAgo: '1d ago'
+    dateLabel: { month: 'NOV', day: '02' },
+    timeAgo: '1 day ago',
+    field: 'registrationDeadline',
+    previousValue: '20 Oct 2026',
+    proposedValue: '02 Nov 2026',
+    explanation: 'Organiser updated the deadline and eligibility criteria.',
+    status: 'pending'
   }
 ];
 
