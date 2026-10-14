@@ -213,9 +213,9 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
   };
 
   return (
-    <div className="needs-review-page" style={{ padding: '0 8px 40px 8px' }}>
+    <div className="needs-review-page" style={{ width: '100%', paddingBottom: '40px' }}>
       {/* 1. Page Heading */}
-      <div className="needs-review-header" style={{ marginBottom: '22px' }}>
+      <div className="needs-review-header" style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.025em' }}>
             Needs Review
@@ -244,16 +244,27 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
         </p>
       </div>
 
-      {/* 2. Four Compact Summary Cards */}
+      {/* 2. Main 2-Column Area: Left Content (Summary + Toolbar + List + Guidelines) + Right Detail Panel */}
       <div
-        className="review-metrics-grid"
+        className="needs-review-main-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '14px',
-          marginBottom: '24px',
+          gridTemplateColumns: activeIssue && activeEvent ? 'minmax(0, 1fr) 370px' : '1fr',
+          gap: '24px',
+          alignItems: 'start',
         }}
       >
+        {/* Left Column: Summary Cards + Filter Toolbar + Issues List + Lower Guidelines */}
+        <div className="needs-review-left-col" style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Four Compact Summary Cards */}
+          <div
+            className="review-metrics-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '12px',
+            }}
+          >
         {/* Card 1: Total to review */}
         <div
           className={`review-metric-card ${activeFilter === 'all' ? 'active-metric-card' : ''}`}
@@ -590,20 +601,8 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
         </div>
       </div>
 
-      {/* 4. Main 2-Column Area: Left Review List + Right Detail Panel */}
-      <div
-        className="needs-review-main-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: activeIssue ? '1fr 390px' : '1fr',
-          gap: '24px',
-          alignItems: 'start',
-        }}
-      >
-        {/* Left Column: Review Issues + Lower Guidelines */}
-        <div className="needs-review-left-col">
-          {/* Issue Cards List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '28px' }}>
+      {/* Issue Cards List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {filteredIssues.length === 0 ? (
               <div
                 style={{
@@ -646,10 +645,7 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
                 const dateDay = item.dateLabel?.day || (evt?.dateLabel?.day) || '25';
 
                 // Thumbnail type
-                let thumbType = 'developer-summit';
-                if (item.eventId.includes('tech-conclave')) thumbType = 'tech-conclave';
-                else if (item.eventId.includes('google')) thumbType = 'google-g';
-                else if (evt?.thumbnailType) thumbType = evt.thumbnailType;
+                const thumbType = evt?.thumbnailType || 'default';
 
                 return (
                   <div
@@ -1023,24 +1019,22 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
           <div
             className="needs-review-detail-panel"
             style={{
+              position: 'sticky',
+              top: '84px',
               background: '#ffffff',
               border: '1px solid #e2e8f0',
               borderRadius: '14px',
               padding: '20px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+              maxHeight: 'calc(100vh - 100px)',
+              overflowY: 'auto',
             }}
           >
             {/* Header: Thumbnail + Title + Close Button */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <EventThumbnail
-                  type={
-                    activeIssue.eventId.includes('tech-conclave')
-                      ? 'tech-conclave'
-                      : activeIssue.eventId.includes('google')
-                      ? 'google-g'
-                      : 'developer-summit'
-                  }
+                  type={activeEvent.thumbnailType || 'default'}
                   size={46}
                 />
                 <div>
@@ -1165,13 +1159,13 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
                         background: '#f8fafc',
                       }}
                     >
-                      <EventThumbnail type="developer-summit" size={36} />
-                      <div style={{ flex: 1 }}>
+                      <EventThumbnail type={activeEvent?.thumbnailType || 'default'} size={36} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0f172a' }}>
-                          Developer Summit
+                          {activeEvent?.title || activeIssue.eventTitle}
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                          25 Oct 2026 • 10:00 AM – 6:00 PM
+                          {activeEvent?.timeRange || activeEvent?.reportingTime || 'Schedule under review'}
                         </div>
                       </div>
                     </div>
@@ -1189,13 +1183,13 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
                         background: '#f8fafc',
                       }}
                     >
-                      <EventThumbnail type="research-symposium" size={36} />
-                      <div style={{ flex: 1 }}>
+                      <EventThumbnail type={conflictingEvent?.thumbnailType || 'default'} size={36} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0f172a' }}>
-                          {conflictingEvent?.title || 'Research Symposium'}
+                          {conflictingEvent?.title || activeIssue.conflictingEventTitle || 'Conflicting Opportunity'}
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                          25 Oct 2026 • 1:00 PM – 4:00 PM
+                          {conflictingEvent?.timeRange || activeIssue.conflictingEventTime || 'Conflicting schedule'}
                         </div>
                       </div>
                     </div>
@@ -1231,7 +1225,7 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
                             Keep this event
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                            Keep Developer Summit in your timeline
+                            Keep {activeEvent?.title || activeIssue.eventTitle} in your timeline
                           </div>
                         </div>
                       </label>
@@ -1261,7 +1255,7 @@ export const NeedsReviewView: React.FC<NeedsReviewViewProps> = ({
                             Keep the other event
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                            Keep Research Symposium instead
+                            Keep {conflictingEvent?.title || activeIssue.conflictingEventTitle || 'alternative event'} instead
                           </div>
                         </div>
                       </label>

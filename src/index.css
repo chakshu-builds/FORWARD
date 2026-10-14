@@ -247,6 +247,7 @@ button {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: var(--bg-app);
@@ -2362,5 +2363,31 @@ button {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Needs Review 2-Column Responsive Layout */
+.needs-review-page {
+  width: 100%;
+}
+
+.needs-review-main-grid {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+}
+
+.needs-review-left-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .needs-review-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 
