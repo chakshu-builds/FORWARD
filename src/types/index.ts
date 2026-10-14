@@ -1,6 +1,6 @@
-export type EventStatus = 'Registered' | 'Interested' | 'In Progress' | 'Submitted';
+export type EventStatus = 'Registered' | 'Interested' | 'In Progress' | 'Submitted' | 'Open';
 
-export type EventCategory = 'Hackathon' | 'Workshop' | 'Competition' | 'Conference' | 'Academic';
+export type EventCategory = 'Hackathons' | 'Workshops' | 'Competitions' | 'Internships' | 'Conferences' | 'Hackathon' | 'Workshop' | 'Competition' | 'Internship' | 'Conference';
 
 export interface SourceNotice {
   id: string;
@@ -26,6 +26,7 @@ export interface PrepTask {
   dueDate: string;
   completed: boolean;
   priority: 'High' | 'Medium' | 'Low';
+  eventId?: string;
 }
 
 export interface EventConflict {
@@ -49,13 +50,20 @@ export interface EventItem {
   organizer: string;
   category: EventCategory;
   status: EventStatus;
-  registrationDeadline: string; // ISO string or human string
+  registrationDeadline: string; // ISO string
   eventStartDate: string;
-  eventEndDate: string;
-  reportingTime: string;
+  eventEndDate?: string;
+  timeRange?: string; // e.g. "10:00 AM - 5:00 PM"
+  dateLabel?: { month: string; day: string };
+  reportingTime?: string;
   venue: string;
+  isOnline?: boolean;
   registrationUrl: string;
   summary: string;
+  thumbnailUrl?: string;
+  thumbnailType?: string;
+  thumbnailGradient?: string;
+  thumbnailIcon?: string;
   sourceNotice: SourceNotice;
   changeHistory: ChangeHistoryEntry[];
   tasks: PrepTask[];
@@ -63,6 +71,7 @@ export interface EventItem {
   tags: string[];
   daysRemaining: number;
   isUrgent?: boolean;
+  createdAt?: string;
 }
 
 export interface ExtractionDraft {
@@ -82,4 +91,23 @@ export interface ExtractionDraft {
   detectedConflictNotice?: string;
 }
 
-export type ActiveView = 'dashboard' | 'timeline' | 'needs-review' | 'all-events';
+export interface AttentionItem {
+  id: string;
+  type: 'conflict' | 'missing_info' | 'update';
+  title: string;
+  eventTitle: string;
+  eventId: string;
+  timeAgo: string;
+  field?: string;
+}
+
+export interface RecentlyAddedItem {
+  id: string;
+  title: string;
+  organizer: string;
+  eventId: string;
+  timeAgo: string;
+  thumbnailType: string;
+}
+
+export type ActiveView = 'overview' | 'timeline' | 'needs-review' | 'sources' | 'settings' | 'dashboard' | 'all-events';

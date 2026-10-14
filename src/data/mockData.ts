@@ -1,218 +1,536 @@
-import type { EventItem, ExtractionDraft } from '../types';
+import type { EventItem, ExtractionDraft, AttentionItem, RecentlyAddedItem, PrepTask } from '../types';
 
 export const INITIAL_EVENTS: EventItem[] = [
   {
-    id: 'evt-hackshift-2026',
-    title: 'HackShift 2026: 36-Hour National Hackathon',
-    organizer: 'Dept. of CSE & ACM Student Chapter',
-    category: 'Hackathon',
+    id: 'evt-product-sprint',
+    title: 'Product Sprint',
+    organizer: 'TechVerse',
+    category: 'Hackathons',
     status: 'In Progress',
-    registrationDeadline: '2026-03-24T23:59:00',
-    eventStartDate: '2026-04-04T08:30:00',
-    eventEndDate: '2026-04-05T20:00:00',
-    reportingTime: '08:30 AM IST (Pending verification)',
-    venue: 'Tech Park Innovation Hall 3 (Discrepancy detected)',
-    registrationUrl: 'https://devfolio.co/hackathons/hackshift-2026',
-    summary: 'Flagship university hackathon focusing on AI agents, campus systems, and open innovation. 36 hours of coding, mentoring, and judging.',
-    daysRemaining: 6,
-    isUrgent: false,
-    tags: ['Hackathon', 'AI', 'Campus', 'Team of 4'],
+    registrationDeadline: '2026-10-14T09:30:00',
+    eventStartDate: '2026-10-14T10:00:00',
+    eventEndDate: '2026-10-14T17:00:00',
+    timeRange: '10:00 AM – 5:00 PM',
+    dateLabel: { month: 'OCT', day: '14' },
+    reportingTime: '09:45 AM IST',
+    venue: 'VIPS, Delhi',
+    isOnline: false,
+    registrationUrl: 'https://techverse.dev/product-sprint-2026',
+    summary: 'A fast-paced 1-day product incubation and UI/UX design sprint. Build working prototypes solving campus logistics and peer collaboration problems.',
+    daysRemaining: 0,
+    isUrgent: true,
+    thumbnailType: 'product-sprint',
+    tags: ['Hackathon', 'Product'],
     sourceNotice: {
-      id: 'src-1',
+      id: 'src-ps-1',
       channel: 'WhatsApp',
-      receivedAt: '2026-03-12 14:22',
-      senderOrSource: 'Class Representatives Group (CRs Official)',
-      rawSnippet: '🚨 HackShift 2026 Registration extended till March 24! Reporting moved from Main Audi to Tech Park Innovation Hall 3 at 8:30 AM sharp. Please inform your teams.',
-      confidenceScore: 0.94,
-      highlightedText: 'Reporting moved from Main Audi to Tech Park Innovation Hall 3 at 8:30 AM sharp'
-    },
-    conflict: {
-      id: 'conf-1',
-      field: 'venue_and_time',
-      fieldLabel: 'Venue & Reporting Time',
-      currentValue: 'Campus Main Auditorium, 09:00 AM IST',
-      currentSource: 'Initial WhatsApp Flyer (Uploaded Mar 10)',
-      currentSourceDate: '2026-03-10',
-      newValue: 'Tech Park Innovation Hall 3, 08:30 AM IST',
-      newSource: 'Discord Organizer Announcement #announcements (Detected Mar 16)',
-      newSourceDate: '2026-03-16',
-      status: 'Pending',
-      explanation: 'Organizers changed the reporting location and time to avoid seating overlap with the annual sports inauguration.'
+      receivedAt: '2026-10-12 16:30',
+      senderOrSource: 'VIPS Tech Circle Official',
+      rawSnippet: '🚀 Product Sprint starts today at VIPS, Delhi! Registration check-in opens at 9:45 AM. Teams must report to Lab 4.',
+      confidenceScore: 0.98
     },
     tasks: [
-      { id: 't-1', title: 'Confirm 4-member team roster on Devfolio portal', dueDate: '2026-03-22', completed: true, priority: 'High' },
-      { id: 't-2', title: 'Prepare architecture diagram & system flow presentation', dueDate: '2026-03-28', completed: true, priority: 'High' },
-      { id: 't-3', title: 'Submit pitch deck link and repo setup to judges dashboard', dueDate: '2026-04-01', completed: false, priority: 'High' },
-      { id: 't-4', title: 'Carry physical college ID cards and multiple power strips', dueDate: '2026-04-04', completed: false, priority: 'Medium' }
+      { id: 't-1', title: 'Register for Product Sprint', dueDate: '2026-10-14', completed: true, priority: 'High' },
+      { id: 't-1b', title: 'Confirm team seating in Lab 4', dueDate: '2026-10-14', completed: true, priority: 'Medium' }
     ],
     changeHistory: [
-      { id: 'h-1', timestamp: '2026-03-10 16:30', changeType: 'Created', description: 'Event extracted from forwarded brochure screenshot', actor: 'Auto-Extracted' },
-      { id: 'h-2', timestamp: '2026-03-12 14:25', changeType: 'Field Updated', description: 'Registration deadline updated to March 24 after extension announcement', actor: 'User Manual' },
-      { id: 'h-3', timestamp: '2026-03-16 09:12', changeType: 'Conflict Resolved', description: 'Flagged discrepancy: Venue changed to Tech Park Innovation Hall 3', actor: 'Reconciliation Engine' }
+      { id: 'h-1', timestamp: '2026-10-12 16:35', changeType: 'Created', description: 'Extracted from VIPS Tech Circle circular', actor: 'Auto-Extracted' },
+      { id: 'h-2', timestamp: '2026-10-14 09:15', changeType: 'Status Changed', description: 'Marked In Progress upon morning check-in', actor: 'User Manual' }
     ]
   },
   {
-    id: 'evt-goldman-sachs-2026',
-    title: 'Goldman Sachs Campus Engineering Challenge',
-    organizer: 'Training & Placement Cell (TPC) in partnership with GS',
-    category: 'Competition',
+    id: 'evt-build-the-next-big-ui',
+    title: 'Build The Next Big UI',
+    organizer: 'Unstop',
+    category: 'Competitions',
     status: 'Registered',
-    registrationDeadline: '2026-03-18T23:59:00',
-    eventStartDate: '2026-03-19T18:00:00',
-    eventEndDate: '2026-03-19T21:00:00',
-    reportingTime: '05:45 PM IST (Online Test Link)',
-    venue: 'Online Assessment (HackerRank Proctored Platform)',
-    registrationUrl: 'https://campus.goldmansachs.com/apply/in-2026',
-    summary: 'Preliminary coding and algorithmic screening for 2027 Summer Analyst and Technology Internships.',
+    registrationDeadline: '2026-10-15T11:00:00',
+    eventStartDate: '2026-10-15T11:00:00',
+    eventEndDate: '2026-10-15T14:00:00',
+    timeRange: '11:00 AM – 2:00 PM',
+    dateLabel: { month: 'OCT', day: '15' },
+    reportingTime: '10:45 AM IST',
+    venue: 'Online',
+    isOnline: true,
+    registrationUrl: 'https://unstop.com/competitions/build-the-next-big-ui',
+    summary: 'National design challenge to create responsive dashboard components, design systems, and fluid micro-interactions.',
     daysRemaining: 1,
     isUrgent: true,
-    tags: ['Placement', 'DSA', 'Screening', 'Individual'],
+    thumbnailType: 'unstop-ui',
+    tags: ['Competition', 'Design'],
     sourceNotice: {
-      id: 'src-2',
-      channel: 'Email',
-      receivedAt: '2026-03-14 10:15',
-      senderOrSource: 'placement.cell@campus.edu via University Webmail',
-      rawSnippet: 'Dear Students, The deadline for GS Engineering Challenge registration is March 18, 23:59 IST. The online test window opens on March 19 at 18:00 IST sharp. Webcams mandatory.',
-      confidenceScore: 0.98,
-      highlightedText: 'registration is March 18, 23:59 IST. The online test window opens on March 19 at 18:00 IST'
-    },
-    tasks: [
-      { id: 't-5', title: 'Verify HackerRank test credentials and system compatibility', dueDate: '2026-03-17', completed: true, priority: 'High' },
-      { id: 't-6', title: 'Revise Graph Algorithms (BFS/DFS/Dijkstra) and Dynamic Programming', dueDate: '2026-03-18', completed: false, priority: 'High' },
-      { id: 't-7', title: 'Submit updated 1-page resume PDF on college TPC portal', dueDate: '2026-03-18', completed: false, priority: 'Medium' }
-    ],
-    changeHistory: [
-      { id: 'h-4', timestamp: '2026-03-14 10:20', changeType: 'Created', description: 'Captured from university placement circular email', actor: 'Auto-Extracted' },
-      { id: 'h-5', timestamp: '2026-03-15 11:00', changeType: 'Status Changed', description: 'Moved status from Interested to Registered', actor: 'User Manual' }
-    ]
-  },
-  {
-    id: 'evt-neurovibe-bci',
-    title: 'NeuroVibe: Brain-Computer Interface Hands-on Workshop',
-    organizer: 'IEEE EMBS & Cognitive Robotics Student Chapter',
-    category: 'Workshop',
-    status: 'Registered',
-    registrationDeadline: '2026-03-21T18:00:00',
-    eventStartDate: '2026-03-23T09:30:00',
-    eventEndDate: '2026-03-23T17:00:00',
-    reportingTime: '09:15 AM IST',
-    venue: 'Biomedical Systems Lab, Block C-302, North Campus',
-    registrationUrl: 'https://ieee-campus.org/workshops/neurovibe-2026',
-    summary: 'Practical hands-on lab using OpenBCI Cyton boards, EEG signal acquisition, Python signal filtering, and real-time motor imagery classification.',
-    daysRemaining: 4,
-    isUrgent: false,
-    tags: ['BCI', 'Neuroscience', 'Python', 'Hands-on Lab'],
-    sourceNotice: {
-      id: 'src-3',
-      channel: 'PDF Flyer',
-      receivedAt: '2026-03-11 19:40',
-      senderOrSource: 'NeuroVibe_Workshop_Flyer_Final.pdf',
-      rawSnippet: 'Hands-on BCI Workshop with hardware kits provided. Limited to 45 seats. Register before March 21, 6 PM. Prerequisites: Basic Python knowledge and laptop with NumPy installed.',
-      confidenceScore: 0.96,
-      highlightedText: 'Register before March 21, 6 PM. Block C-302 North Campus'
-    },
-    tasks: [
-      { id: 't-8', title: 'Install Python MNE, SciPy, and BrainFlow library environments', dueDate: '2026-03-22', completed: true, priority: 'Medium' },
-      { id: 't-9', title: 'Download reference dataset and sample EEG filter notebooks', dueDate: '2026-03-22', completed: false, priority: 'Low' }
-    ],
-    changeHistory: [
-      { id: 'h-6', timestamp: '2026-03-11 19:45', changeType: 'Created', description: 'Extracted from department noticeboard PDF flyer', actor: 'Auto-Extracted' }
-    ]
-  },
-  {
-    id: 'evt-ieee-symposium',
-    title: 'IEEE International Student Symposium on Distributed AI',
-    organizer: 'IEEE Computer Society Region 10',
-    category: 'Conference',
-    status: 'Interested',
-    registrationDeadline: '2026-04-10T23:59:00',
-    eventStartDate: '2026-04-24T09:00:00',
-    eventEndDate: '2026-04-26T18:00:00',
-    reportingTime: '08:45 AM IST',
-    venue: 'Convention Center Hall A & Hybrid Live Stream',
-    registrationUrl: 'https://ieeecs-symposium2026.org',
-    summary: 'Three-day academic symposium featuring keynotes from AI researchers, poster presentations on federated learning, and student research tracks.',
-    daysRemaining: 23,
-    isUrgent: false,
-    tags: ['Research', 'AI/ML', 'Paper Presentation', 'Hybrid'],
-    sourceNotice: {
-      id: 'src-4',
+      id: 'src-ui-1',
       channel: 'Web Link',
-      receivedAt: '2026-03-08 11:20',
-      senderOrSource: 'https://ieeecs-symposium2026.org/call-for-posters',
-      rawSnippet: 'Call for Student Posters and Early Registrations open till April 10, 2026. Early bird discount applies to active IEEE student members.',
-      confidenceScore: 0.92
-    },
-    tasks: [
-      { id: 't-10', title: 'Review abstract submission guidelines with faculty mentor', dueDate: '2026-04-05', completed: false, priority: 'Medium' }
-    ],
-    changeHistory: [
-      { id: 'h-7', timestamp: '2026-03-08 11:22', changeType: 'Created', description: 'Parsed from conference web link', actor: 'Auto-Extracted' }
-    ]
-  },
-  {
-    id: 'evt-sih-screening',
-    title: 'Smart India Hackathon 2026 — Internal College Screening',
-    organizer: 'Ministry of Education Innovation Cell & College R&D Hub',
-    category: 'Hackathon',
-    status: 'Submitted',
-    registrationDeadline: '2026-03-15T17:00:00',
-    eventStartDate: '2026-04-12T10:00:00',
-    eventEndDate: '2026-04-12T18:00:00',
-    reportingTime: '09:30 AM IST',
-    venue: 'Research & Incubation Seminar Hall 2',
-    registrationUrl: 'https://sih.gov.in',
-    summary: 'Mandatory internal college qualifier for nominating teams to the national SIH 2026 portal. 10 teams will be selected across hardware and software categories.',
-    daysRemaining: 15,
-    isUrgent: false,
-    tags: ['National', 'Govt of India', 'Nomination', 'Team of 6'],
-    sourceNotice: {
-      id: 'src-5',
-      channel: 'WhatsApp',
-      receivedAt: '2026-03-05 15:00',
-      senderOrSource: 'Official SPOC Broadcast Channel',
-      rawSnippet: 'All nominated teams must submit initial problem statement PPT before March 15. Shortlisted list for internal presentations will be published by April 5.',
+      receivedAt: '2026-10-10 14:00',
+      senderOrSource: 'Unstop Design Portal',
+      rawSnippet: 'Build The Next Big UI: Online submission window closes on Oct 15 at 2:00 PM. Figma prototype and Loom demo video required.',
       confidenceScore: 0.99
     },
     tasks: [
-      { id: 't-11', title: 'Submit 5-slide concept PPT to College SPOC email', dueDate: '2026-03-15', completed: true, priority: 'High' },
-      { id: 't-12', title: 'Prepare hardware bill-of-materials and circuit prototype', dueDate: '2026-04-10', completed: false, priority: 'Medium' }
+      { id: 't-2', title: 'Complete application for Build The Next Big UI', dueDate: '2026-10-15', completed: true, priority: 'High' },
+      { id: 't-2b', title: 'Record 2-minute Loom walkthrough of UI components', dueDate: '2026-10-15', completed: false, priority: 'Medium' }
     ],
     changeHistory: [
-      { id: 'h-8', timestamp: '2026-03-05 15:05', changeType: 'Created', description: 'Captured from SPOC announcement', actor: 'Auto-Extracted' },
-      { id: 'h-9', timestamp: '2026-03-15 16:45', changeType: 'Status Changed', description: 'Status changed to Submitted after PPT submission', actor: 'User Manual' }
+      { id: 'h-3', timestamp: '2026-10-10 14:05', changeType: 'Created', description: 'Captured from Unstop competition link', actor: 'Auto-Extracted' },
+      { id: 'h-4', timestamp: '2026-10-13 18:00', changeType: 'Status Changed', description: 'Registered after team submission approval', actor: 'User Manual' }
     ]
   },
   {
-    id: 'evt-devops-bootcamp',
-    title: 'Kubernetes & Cloud Native Weekend Bootcamp',
-    organizer: 'Google Developer Groups (GDG) on Campus',
-    category: 'Workshop',
+    id: 'evt-google-winter-internship',
+    title: 'Google Winter Internship',
+    organizer: 'Google',
+    category: 'Internships',
     status: 'Interested',
-    registrationDeadline: '2026-04-16T23:59:00',
-    eventStartDate: '2026-04-18T10:00:00',
-    eventEndDate: '2026-04-19T16:00:00',
-    reportingTime: '09:45 AM IST',
-    venue: 'Virtual Interactive Lab (Google Meet & Cloud Shell)',
-    registrationUrl: 'https://gdg.community.dev/events/details/cloud-bootcamp-2026',
-    summary: 'Crash course in Docker containers, Pod networking, Helm charts, and CI/CD pipelines with hands-on Google Cloud credits provided.',
-    daysRemaining: 29,
+    registrationDeadline: '2026-10-20T23:59:00',
+    eventStartDate: '2026-10-20T10:00:00',
+    eventEndDate: '2026-10-20T18:00:00',
+    timeRange: '20 Oct 2026',
+    dateLabel: { month: 'OCT', day: '20' },
+    reportingTime: 'Online Portal Open',
+    venue: 'Online',
+    isOnline: true,
+    registrationUrl: 'https://careers.google.com/students/winter-2027',
+    summary: 'Applications open for Software Engineering Winter Internships (January – June 2027 cycle) across Bangalore and Hyderabad engineering campuses.',
+    daysRemaining: 6,
     isUrgent: false,
-    tags: ['Cloud', 'Kubernetes', 'Docker', 'GCP'],
+    thumbnailType: 'google-winter',
+    tags: ['Internship', 'Career'],
     sourceNotice: {
-      id: 'src-6',
-      channel: 'Discord',
-      receivedAt: '2026-03-13 22:10',
-      senderOrSource: '#tech-events channel in Campus Devs Discord',
-      rawSnippet: 'GDG Campus is hosting a 2-day hands-on Kubernetes weekend sprint. $100 Google Cloud credits voucher for each attendee. Free registration.',
-      confidenceScore: 0.95
+      id: 'src-gw-1',
+      channel: 'Email',
+      receivedAt: '2026-10-13 10:00',
+      senderOrSource: 'university-relations@google.com',
+      rawSnippet: 'Notice: Google Winter 2027 Internship application deadline updated. All eligible 3rd and 4th year students must apply by 20 Oct 2026.',
+      confidenceScore: 0.97
     },
     tasks: [
-      { id: 't-13', title: 'Claim GCP free student credits voucher code', dueDate: '2026-04-17', completed: false, priority: 'Low' }
+      { id: 't-4', title: 'Prepare for Google Winter Internship', dueDate: '2026-10-20', completed: false, priority: 'High' },
+      { id: 't-4b', title: 'Update resume with recent open source PRs and DSA projects', dueDate: '2026-10-19', completed: false, priority: 'Medium' }
     ],
     changeHistory: [
-      { id: 'h-10', timestamp: '2026-03-13 22:15', changeType: 'Created', description: 'Captured from Discord #tech-events channel', actor: 'Auto-Extracted' }
+      { id: 'h-5', timestamp: '2026-10-13 10:05', changeType: 'Created', description: 'Ingested from university placement circular email', actor: 'Auto-Extracted' }
     ]
+  },
+  {
+    id: 'evt-developer-summit',
+    title: 'Developer Summit',
+    organizer: 'GDSC Delhi',
+    category: 'Conferences',
+    status: 'Open',
+    registrationDeadline: '2026-10-25T10:00:00',
+    eventStartDate: '2026-10-25T10:00:00',
+    eventEndDate: '2026-10-25T18:00:00',
+    timeRange: '10:00 AM – 6:00 PM',
+    dateLabel: { month: 'OCT', day: '25' },
+    reportingTime: '09:30 AM IST',
+    venue: 'Bengaluru',
+    isOnline: false,
+    registrationUrl: 'https://gdsc.community.dev/events/delhi-summit-2026',
+    summary: 'Annual Google Developer Student Clubs Summit with keynotes on Cloud Native architectures, GenAI APIs, and system design patterns.',
+    daysRemaining: 11,
+    isUrgent: false,
+    thumbnailType: 'developer-summit',
+    tags: ['Conference', 'Development'],
+    conflict: {
+      id: 'conf-ds-1',
+      field: 'event_date',
+      fieldLabel: 'Event Date & Schedule',
+      currentValue: '25 Oct 2026, 10:00 AM – 6:00 PM',
+      currentSource: 'Initial Meetup Poster (Oct 08)',
+      currentSourceDate: '2026-10-08',
+      newValue: '28 Oct 2026, 09:30 AM – 5:30 PM',
+      newSource: 'Faculty Coordinator WhatsApp Notice (Oct 14, 2h ago)',
+      newSourceDate: '2026-10-14',
+      status: 'Pending',
+      explanation: 'Faculty coordinator notified of date shift from 25 Oct to 28 Oct due to semester midterm examinations.'
+    },
+    sourceNotice: {
+      id: 'src-ds-1',
+      channel: 'Discord',
+      receivedAt: '2026-10-14 14:00',
+      senderOrSource: '#announcements in GDSC Delhi Discord',
+      rawSnippet: '⚠️ Attention: Developer Summit schedule updated. Check portal for adjusted timing and registration status.',
+      confidenceScore: 0.94
+    },
+    tasks: [
+      { id: 't-3', title: 'Review conflicting date (Developer Summit)', dueDate: '2026-10-16', completed: false, priority: 'High' }
+    ],
+    changeHistory: [
+      { id: 'h-6', timestamp: '2026-10-08 11:20', changeType: 'Created', description: 'Extracted from GDSC community page', actor: 'Auto-Extracted' },
+      { id: 'h-7', timestamp: '2026-10-14 14:02', changeType: 'Field Updated', description: 'Discrepancy flagged: conflicting event date detected', actor: 'Reconciliation Engine' }
+    ]
+  },
+  {
+    id: 'evt-innovate-for-bharat',
+    title: 'Innovate for Bharat',
+    organizer: 'IIT Delhi',
+    category: 'Hackathons',
+    status: 'Open',
+    registrationDeadline: '2026-10-30T23:59:00',
+    eventStartDate: '2026-11-02T09:00:00',
+    eventEndDate: '2026-11-03T18:00:00',
+    timeRange: '2 Nov 2026',
+    dateLabel: { month: 'NOV', day: '02' },
+    reportingTime: '08:30 AM IST',
+    venue: 'IIT Delhi',
+    isOnline: false,
+    registrationUrl: 'https://iitd.ac.in/innovate-for-bharat',
+    summary: 'Flagship national hackathon solving grassroots problems in public health, education accessibility, and rural supply chains.',
+    daysRemaining: 19,
+    isUrgent: false,
+    thumbnailType: 'innovate-bharat',
+    tags: ['Hackathon', 'Social Impact'],
+    conflict: {
+      id: 'conf-ib-1',
+      field: 'venue',
+      fieldLabel: 'Reporting Venue',
+      currentValue: 'Seminar Hall 1, Main Campus',
+      currentSource: 'Initial Circular PDF',
+      currentSourceDate: '2026-10-05',
+      newValue: 'Dogra Hall & Senate Arcade, IIT Delhi',
+      newSource: 'IITD Academic Circular #44',
+      newSourceDate: '2026-10-13',
+      status: 'Pending',
+      explanation: 'Relocated to Dogra Hall to accommodate 500+ participants.'
+    },
+    sourceNotice: {
+      id: 'src-ib-1',
+      channel: 'PDF Flyer',
+      receivedAt: '2026-10-13 18:30',
+      senderOrSource: 'IITD_Innovate_Circular_v2.pdf',
+      rawSnippet: 'Innovate for Bharat: Updated venue is Dogra Hall, IIT Delhi. 2 Nov 2026 kickoff.',
+      confidenceScore: 0.98
+    },
+    tasks: [
+      { id: 't-5', title: 'Check updated venue for Innovate for Bharat', dueDate: '2026-10-25', completed: false, priority: 'Medium' }
+    ],
+    changeHistory: [
+      { id: 'h-8', timestamp: '2026-10-05 12:00', changeType: 'Created', description: 'Extracted from noticeboard flyer', actor: 'Auto-Extracted' }
+    ]
+  },
+  {
+    id: 'evt-tech-conclave-2026',
+    title: 'Tech Conclave 2026',
+    organizer: 'Delhi Technical University',
+    category: 'Conferences',
+    status: 'Open',
+    registrationDeadline: '2026-10-22T23:59:00',
+    eventStartDate: '2026-10-27T10:00:00',
+    eventEndDate: '2026-10-28T17:00:00',
+    timeRange: '27 Oct 2026',
+    dateLabel: { month: 'OCT', day: '27' },
+    reportingTime: '10:00 AM IST',
+    venue: 'Venue TBD (Notice missing location)',
+    isOnline: false,
+    registrationUrl: 'https://dtu.ac.in/conclave-2026',
+    summary: 'Annual research conclave showcasing student publications, patents, and faculty-sponsored deeptech startups.',
+    daysRemaining: 8,
+    isUrgent: false,
+    thumbnailType: 'tech-conclave',
+    tags: ['Conference', 'Academic'],
+    sourceNotice: {
+      id: 'src-tc-1',
+      channel: 'WhatsApp',
+      receivedAt: '2026-10-14 11:00',
+      senderOrSource: 'Inter-College Tech Broadcast',
+      rawSnippet: 'Tech Conclave 2026 scheduled for Oct 27. Registration deadline Oct 22. Venue will be confirmed shortly in follow-up notice.',
+      confidenceScore: 0.88
+    },
+    tasks: [],
+    changeHistory: [
+      { id: 'h-9', timestamp: '2026-10-14 11:05', changeType: 'Created', description: 'Extracted with missing venue flagged', actor: 'Auto-Extracted' }
+    ]
+  },
+  {
+    id: 'evt-shepreneurs-2026',
+    title: 'ShePreneurs 2026',
+    organizer: 'Campus Startup Challenge',
+    category: 'Competitions',
+    status: 'Open',
+    registrationDeadline: '2026-10-29T23:59:00',
+    eventStartDate: '2026-11-05T09:30:00',
+    eventEndDate: '2026-11-06T18:00:00',
+    timeRange: '5 Nov 2026',
+    dateLabel: { month: 'NOV', day: '05' },
+    reportingTime: '09:00 AM IST',
+    venue: 'Incubation Wing Auditorium',
+    isOnline: false,
+    registrationUrl: 'https://shepreneurs.org/apply',
+    summary: 'Seed funding pitch challenge supporting female campus founders and student-led ventures with mentorship and micro-grants.',
+    daysRemaining: 15,
+    isUrgent: false,
+    thumbnailType: 'shepreneurs',
+    tags: ['Competition', 'Startup'],
+    sourceNotice: {
+      id: 'src-sp-1',
+      channel: 'Email',
+      receivedAt: '2026-10-14 15:30',
+      senderOrSource: 'startup-cell@campus.edu',
+      rawSnippet: 'ShePreneurs 2026 registration is now live. Submit executive summary before Oct 29.',
+      confidenceScore: 0.99
+    },
+    tasks: [],
+    changeHistory: [
+      { id: 'h-10', timestamp: '2026-10-14 15:35', changeType: 'Created', description: 'Extracted from campus newsletter email', actor: 'Auto-Extracted' }
+    ]
+  },
+  {
+    id: 'evt-code-and-create',
+    title: 'Code & Create',
+    organizer: 'VIPS Hackathon',
+    category: 'Hackathons',
+    status: 'Registered',
+    registrationDeadline: '2026-10-18T23:59:00',
+    eventStartDate: '2026-10-24T09:00:00',
+    eventEndDate: '2026-10-25T16:00:00',
+    timeRange: '24 Oct 2026',
+    dateLabel: { month: 'OCT', day: '24' },
+    reportingTime: '08:45 AM IST',
+    venue: 'VIPS Central Hall',
+    isOnline: false,
+    registrationUrl: 'https://vips.edu/code-create',
+    summary: 'Weekend web development hackathon featuring mentor tracks in Web3, accessible interfaces, and edge computing.',
+    daysRemaining: 4,
+    isUrgent: false,
+    thumbnailType: 'code-create',
+    tags: ['Hackathon', 'WebDev'],
+    sourceNotice: {
+      id: 'src-cc-1',
+      channel: 'Discord',
+      receivedAt: '2026-10-14 13:45',
+      senderOrSource: '#hackathons in VIPS Devs',
+      rawSnippet: 'Code & Create hackathon registered teams list confirmed. Event kicks off Oct 24 in Central Hall.',
+      confidenceScore: 0.96
+    },
+    tasks: [],
+    changeHistory: [
+      { id: 'h-11', timestamp: '2026-10-14 13:50', changeType: 'Created', description: 'Extracted from Discord channel notice', actor: 'Auto-Extracted' }
+    ]
+  },
+  {
+    id: 'evt-research-symposium',
+    title: 'Research Symposium',
+    organizer: 'IIIT Delhi',
+    category: 'Conferences',
+    status: 'Registered',
+    registrationDeadline: '2026-10-17T23:59:00',
+    eventStartDate: '2026-10-29T09:00:00',
+    eventEndDate: '2026-10-30T17:00:00',
+    timeRange: '29 Oct 2026',
+    dateLabel: { month: 'OCT', day: '29' },
+    reportingTime: '08:30 AM IST',
+    venue: 'IIIT Delhi R&D Block',
+    isOnline: false,
+    registrationUrl: 'https://iiitd.ac.in/symposium-2026',
+    summary: 'International symposium on Distributed Systems and Machine Learning architectures with keynote speakers from top labs.',
+    daysRemaining: 3,
+    isUrgent: true,
+    thumbnailType: 'research-symposium',
+    tags: ['Conference', 'Research'],
+    sourceNotice: {
+      id: 'src-rs-1',
+      channel: 'Web Link',
+      receivedAt: '2026-10-14 10:45',
+      senderOrSource: 'IIITD Department Portal',
+      rawSnippet: 'Student delegate registration for Research Symposium open until Oct 17.',
+      confidenceScore: 0.95
+    },
+    tasks: [],
+    changeHistory: [
+      { id: 'h-12', timestamp: '2026-10-14 10:50', changeType: 'Created', description: 'Extracted from university research portal', actor: 'Auto-Extracted' }
+    ]
+  },
+  {
+    id: 'evt-hackshift-2026',
+    title: 'HackShift 2026',
+    organizer: 'ACM Student Chapter',
+    category: 'Hackathons',
+    status: 'In Progress',
+    registrationDeadline: '2026-10-16T23:59:00',
+    eventStartDate: '2026-10-23T09:00:00',
+    eventEndDate: '2026-10-24T20:00:00',
+    timeRange: '23 Oct 2026',
+    dateLabel: { month: 'OCT', day: '23' },
+    reportingTime: '08:30 AM IST',
+    venue: 'Campus Tech Park',
+    isOnline: false,
+    registrationUrl: 'https://devfolio.co/hackathons/hackshift-2026',
+    summary: 'Flagship national hackathon solving campus journey challenges with agentic workflows.',
+    daysRemaining: 2,
+    isUrgent: true,
+    thumbnailType: 'product-sprint',
+    tags: ['Hackathon', 'Agents'],
+    sourceNotice: {
+      id: 'src-hs-1',
+      channel: 'WhatsApp',
+      receivedAt: '2026-10-12 11:00',
+      senderOrSource: 'ACM Official Broadcast',
+      rawSnippet: 'HackShift 2026 teams: check-in confirmed for Oct 23.',
+      confidenceScore: 0.99
+    },
+    tasks: [],
+    changeHistory: []
+  },
+  {
+    id: 'evt-ai-robotics-workshop',
+    title: 'AI & Robotics Hands-on Lab',
+    organizer: 'Robotics Club',
+    category: 'Workshops',
+    status: 'Interested',
+    registrationDeadline: '2026-10-21T18:00:00',
+    eventStartDate: '2026-10-26T14:00:00',
+    eventEndDate: '2026-10-26T18:00:00',
+    timeRange: '26 Oct 2026',
+    dateLabel: { month: 'OCT', day: '26' },
+    reportingTime: '01:45 PM IST',
+    venue: 'Block D Lab 2',
+    isOnline: false,
+    registrationUrl: 'https://robotics-campus.edu/lab',
+    summary: 'Hands-on ROS 2 workshop on autonomous navigation and lidar mapping on TurtleBot hardware.',
+    daysRemaining: 7,
+    isUrgent: false,
+    thumbnailType: 'unstop-ui',
+    tags: ['Workshop', 'Robotics'],
+    sourceNotice: {
+      id: 'src-ar-1',
+      channel: 'PDF Flyer',
+      receivedAt: '2026-10-11 12:00',
+      senderOrSource: 'Robotics_Lab_Poster.pdf',
+      rawSnippet: 'Limited seats for hands-on ROS 2 session.',
+      confidenceScore: 0.92
+    },
+    tasks: [],
+    changeHistory: []
+  },
+  {
+    id: 'evt-cloud-native-devops',
+    title: 'Cloud Native DevOps Bootcamp',
+    organizer: 'GDG on Campus',
+    category: 'Workshops',
+    status: 'Registered',
+    registrationDeadline: '2026-10-19T23:59:00',
+    eventStartDate: '2026-10-31T10:00:00',
+    eventEndDate: '2026-11-01T16:00:00',
+    timeRange: '31 Oct 2026',
+    dateLabel: { month: 'OCT', day: '31' },
+    reportingTime: '09:30 AM IST',
+    venue: 'Online (Google Meet)',
+    isOnline: true,
+    registrationUrl: 'https://gdg.community.dev/events/devops-bootcamp',
+    summary: 'Docker containers, Kubernetes clusters, and GitHub Actions CI/CD pipelines crash course.',
+    daysRemaining: 5,
+    isUrgent: false,
+    thumbnailType: 'google-winter',
+    tags: ['Workshop', 'Cloud'],
+    sourceNotice: {
+      id: 'src-cn-1',
+      channel: 'Discord',
+      receivedAt: '2026-10-13 19:00',
+      senderOrSource: '#cloud in GDG Discord',
+      rawSnippet: 'GCP free credits code provided to all registered participants.',
+      confidenceScore: 0.95
+    },
+    tasks: [],
+    changeHistory: []
+  }
+];
+
+export const INITIAL_ATTENTION_ITEMS: AttentionItem[] = [
+  {
+    id: 'att-1',
+    type: 'conflict',
+    title: 'Conflicting date detected',
+    eventTitle: 'Developer Summit',
+    eventId: 'evt-developer-summit',
+    timeAgo: '2h ago',
+    field: 'event_date'
+  },
+  {
+    id: 'att-2',
+    type: 'missing_info',
+    title: 'Missing venue information',
+    eventTitle: 'Tech Conclave 2026',
+    eventId: 'evt-tech-conclave-2026',
+    timeAgo: '5h ago',
+    field: 'venue'
+  },
+  {
+    id: 'att-3',
+    type: 'update',
+    title: 'New update available',
+    eventTitle: 'Google Winter Internship',
+    eventId: 'evt-google-winter-internship',
+    timeAgo: '1d ago'
+  }
+];
+
+export const INITIAL_RECENTLY_ADDED: RecentlyAddedItem[] = [
+  {
+    id: 'rec-1',
+    title: 'ShePreneurs 2026',
+    organizer: 'Campus Startup Challenge',
+    eventId: 'evt-shepreneurs-2026',
+    timeAgo: 'Just now',
+    thumbnailType: 'shepreneurs'
+  },
+  {
+    id: 'rec-2',
+    title: 'Code & Create',
+    organizer: 'VIPS Hackathon',
+    eventId: 'evt-code-and-create',
+    timeAgo: '2h ago',
+    thumbnailType: 'code-create'
+  },
+  {
+    id: 'rec-3',
+    title: 'Research Symposium',
+    organizer: 'IIIT Delhi',
+    eventId: 'evt-research-symposium',
+    timeAgo: '5h ago',
+    thumbnailType: 'research-symposium'
+  }
+];
+
+export const INITIAL_NEXT_MOVES: PrepTask[] = [
+  {
+    id: 'task-1',
+    title: 'Register for Product Sprint',
+    dueDate: '2026-10-14',
+    completed: true,
+    priority: 'High',
+    eventId: 'evt-product-sprint'
+  },
+  {
+    id: 'task-2',
+    title: 'Complete application for Build The Next Big UI',
+    dueDate: '2026-10-15',
+    completed: true,
+    priority: 'High',
+    eventId: 'evt-build-the-next-big-ui'
+  },
+  {
+    id: 'task-3',
+    title: 'Review conflicting date (Developer Summit)',
+    dueDate: '2026-10-16',
+    completed: false,
+    priority: 'High',
+    eventId: 'evt-developer-summit'
+  },
+  {
+    id: 'task-4',
+    title: 'Prepare for Google Winter Internship',
+    dueDate: '2026-10-20',
+    completed: false,
+    priority: 'Medium',
+    eventId: 'evt-google-winter-internship'
+  },
+  {
+    id: 'task-5',
+    title: 'Check updated venue for Innovate for Bharat',
+    dueDate: '2026-10-25',
+    completed: false,
+    priority: 'Medium',
+    eventId: 'evt-innovate-for-bharat'
   }
 ];
 
@@ -229,21 +547,20 @@ Due to university convocation rehearsals, HackShift 2026 finals venue has been r
 Please ensure all team members confirm their attendance before March 28, 23:59 IST.`,
 
   flyerName: `HackShift_2026_Official_Circular_V2.pdf`,
-  
   sampleUrl: `https://devfolio.co/hackathons/hackshift-2026`
 };
 
 export const SAMPLE_EXTRACTION_RESULT: ExtractionDraft = {
   title: 'HackShift 2026: 36-Hour National Hackathon',
   organizer: 'Dept. of CSE & ACM Student Chapter',
-  category: 'Hackathon',
-  registrationDeadline: '2026-03-28T23:59:00',
-  eventStartDate: '2026-04-04T08:30:00',
-  eventEndDate: '2026-04-05T20:00:00',
+  category: 'Hackathons',
+  registrationDeadline: '2026-10-28T23:59:00',
+  eventStartDate: '2026-11-04T08:30:00',
+  eventEndDate: '2026-11-05T20:00:00',
   reportingTime: '08:30 AM IST',
   venue: 'Tech Park Innovation Hall 3 (Gate 4)',
   registrationUrl: 'https://devfolio.co/hackathons/hackshift-2026/checkin',
-  sourceText: 'Due to university convocation rehearsals, HackShift 2026 finals venue has been relocated: New Venue: Tech Park Innovation Hall 3 (NOT Main Auditorium). Reporting Time: 08:30 AM IST sharp. Confirmation deadline: March 28.',
+  sourceText: 'Due to university convocation rehearsals, HackShift 2026 finals venue has been relocated: New Venue: Tech Park Innovation Hall 3 (NOT Main Auditorium). Reporting Time: 08:30 AM IST sharp. Confirmation deadline: October 28.',
   sourceChannel: 'WhatsApp',
   confidenceScore: 0.96,
   lowConfidenceFields: ['reportingTime'],

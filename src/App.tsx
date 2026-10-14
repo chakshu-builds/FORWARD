@@ -1,11 +1,30 @@
 import { useState, useMemo, useEffect } from 'react';
-import type { EventItem, EventStatus, ExtractionDraft, ActiveView } from './types';
-import { INITIAL_EVENTS, SAMPLE_EXTRACTION_RESULT } from './data/mockData';
-import { Navbar } from './components/Navbar';
-import { WorkflowBar } from './components/WorkflowBar';
-import { NextDeadlineHero } from './components/NextDeadlineHero';
-import { EventCard } from './components/EventCard';
-import { SidebarWidgets } from './components/SidebarWidgets';
+import type {
+  EventItem,
+  EventStatus,
+  ExtractionDraft,
+  ActiveView,
+  AttentionItem,
+  RecentlyAddedItem,
+  PrepTask
+} from './types';
+import {
+  INITIAL_EVENTS,
+  INITIAL_ATTENTION_ITEMS,
+  INITIAL_RECENTLY_ADDED,
+  INITIAL_NEXT_MOVES,
+  SAMPLE_EXTRACTION_RESULT
+} from './data/mockData';
+import { Sidebar } from './components/Sidebar';
+import { TopHeader } from './components/TopHeader';
+import { GreetingHeader } from './components/GreetingHeader';
+import { MetricsRow } from './components/MetricsRow';
+import { UpcomingEventsSection } from './components/UpcomingEventsSection';
+import { NeedsAttentionCard } from './components/NeedsAttentionCard';
+import { RecentlyAddedCard } from './components/RecentlyAddedCard';
+import { CalendarPanel } from './components/CalendarPanel';
+import { NextMovesPanel } from './components/NextMovesPanel';
+
 import { CaptureModal } from './components/CaptureModal';
 import { ExtractionReviewModal } from './components/ExtractionReviewModal';
 import { EventDetailModal } from './components/EventDetailModal';
@@ -13,32 +32,74 @@ import { ConflictModal } from './components/ConflictModal';
 import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
 import {
-  Search,
-  Filter,
-  ArrowUpDown,
-  Calendar,
   AlertCircle,
   CheckCircle2,
-  Info
+  ArrowRight
 } from 'lucide-react';
 
 export function App() {
-  // State
-  const [events, setEvents] = useState<EventItem[]>(INITIAL_EVENTS);
-  const [activeView, setActiveView] = useState<ActiveView>('dashboard');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedStatus, setSelectedStatus] = useState<string>('All');
-  const [sortBy, setSortBy] = useState<'deadline' | 'title'>('deadline');
+  // Main Data States with localStorage persistence fallback
+  const [events, setEvents] = useState<EventItem[]>(() => {
+    const saved = localStorage.getItem('forward_events_v2');
+    return saved ? JSON.parse(saved) : INITIAL_EVENTS;
+  });
 
-  // Modals state
+  const [attentionItems, setAttentionItems] = useState<AttentionItem[]>(() => {
+    const saved = localStorage.getItem('forward_attention_v2');
+    return saved ? JSON.parse(saved) : INITIAL_ATTENTION_ITEMS;
+  });
+
+  const [recentlyAdded, setRecentlyAdded] = useState<RecentlyAddedItem[]>(() => {
+    const saved = localStorage.getItem('forward_recent_v2');
+    return saved ? JSON.parse(saved) : INITIAL_RECENTLY_ADDED;
+  });
+
+  const [nextMoves, setNextMoves] = useState<PrepTask[]>(() => {
+    const saved = localStorage.getItem('forward_moves_v2');
+    return saved ? JSON.parse(saved) : INITIAL_NEXT_MOVES;
+  });
+
+  // Navigation & Search State
+  const [activeView, setActiveView] = useState<ActiveView>('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date(2026, 9, 14)); // Oct 14, 2026
+
+  // Header Dropdowns State
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Modals State
   const [isCaptureOpen, setIsCaptureOpen] = useState(false);
   const [isExtractionReviewOpen, setIsExtractionReviewOpen] = useState(false);
   const [extractionDraft, setExtractionDraft] = useState<ExtractionDraft>(SAMPLE_EXTRACTION_RESULT);
   const [detailEventId, setDetailEventId] = useState<string | null>(null);
   const [conflictEventId, setConflictEventId] = useState<string | null>(null);
 
-  // Global Escape key support to dismiss modals cleanly
+  // Filter state for My Timeline view
+  const [timelineCategory, setTimelineCategory] = useState<string>('All');
+  const [timelineStatus, setTimelineStatus] = useState<string>('All');
+
+  // Toasts
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem('forward_events_v2', JSON.stringify(events));
+  }, [events]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_attention_v2', JSON.stringify(attentionItems));
+  }, [attentionItems]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_recent_v2', JSON.stringify(recentlyAdded));
+  }, [recentlyAdded]);
+
+  useEffect(() => {
+    localStorage.setItem('forward_moves_v2', JSON.stringify(nextMoves));
+  }, [nextMoves]);
+
+  // Global Escape key listener to dismiss open modals or dropdowns
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -46,21 +107,13 @@ export function App() {
         setIsExtractionReviewOpen(false);
         setDetailEventId(null);
         setConflictEventId(null);
+        setIsNotificationsOpen(false);
+        setIsProfileOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  // Toasts
-  const [toasts, setToasts] = useState<ToastMessage[]>([
-    {
-      id: 'toast-welcome',
-      type: 'info',
-      title: 'FORWARD Prototype Loaded',
-      description: 'Simulating unified timeline with 6 campus opportunities and 1 pending discrepancy.'
-    }
-  ]);
 
   const addToast = (type: 'success' | 'warning' | 'info', title: string, description?: string) => {
     const newToast: ToastMessage = {
@@ -73,11 +126,24 @@ export function App() {
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
-    }, 4500);
+    }, 4000);
   };
 
   const dismissToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Reset demo data
+  const handleResetDemoData = () => {
+    localStorage.removeItem('forward_events_v2');
+    localStorage.removeItem('forward_attention_v2');
+    localStorage.removeItem('forward_recent_v2');
+    localStorage.removeItem('forward_moves_v2');
+    setEvents(INITIAL_EVENTS);
+    setAttentionItems(INITIAL_ATTENTION_ITEMS);
+    setRecentlyAdded(INITIAL_RECENTLY_ADDED);
+    setNextMoves(INITIAL_NEXT_MOVES);
+    addToast('info', 'Prototype Reset', 'Restored default reference dashboard state.');
   };
 
   // Selected event getters
@@ -91,154 +157,93 @@ export function App() {
     [events, conflictEventId]
   );
 
-  // Conflicted events
-  const conflictedEvents = useMemo(
+  // Conflicted events for badge
+  const pendingConflicts = useMemo(
     () => events.filter((e) => e.conflict && e.conflict.status === 'Pending'),
     [events]
   );
 
-  // Upcoming critical deadline event (Goldman Sachs CodeSprint or nearest)
-  const urgentDeadlineEvent = useMemo(() => {
-    return events.find((e) => e.isUrgent) || events[0];
-  }, [events]);
-
-  // Aggregated checklist tasks
-  const allTasks = useMemo(() => {
-    return events.flatMap((e) =>
-      e.tasks.map((task) => ({
-        task,
-        eventTitle: e.title,
-        eventId: e.id
-      }))
+  // Filtered events based on search query
+  const searchedEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const q = searchQuery.toLowerCase();
+    return events.filter(
+      (e) =>
+        e.title.toLowerCase().includes(q) ||
+        e.organizer.toLowerCase().includes(q) ||
+        e.venue.toLowerCase().includes(q) ||
+        e.tags.some((t) => t.toLowerCase().includes(q))
     );
-  }, [events]);
+  }, [events, searchQuery]);
 
-  // Filtered & Sorted events
-  const filteredEvents = useMemo(() => {
-    let result = [...events];
-
-    if (activeView === 'needs-review') {
-      result = result.filter((e) => e.conflict && e.conflict.status === 'Pending');
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (e) =>
-          e.title.toLowerCase().includes(q) ||
-          e.organizer.toLowerCase().includes(q) ||
-          e.venue.toLowerCase().includes(q) ||
-          e.tags.some((t) => t.toLowerCase().includes(q))
-      );
-    }
-
-    if (selectedCategory !== 'All') {
-      result = result.filter((e) => e.category === selectedCategory);
-    }
-
-    if (selectedStatus !== 'All') {
-      result = result.filter((e) => e.status === selectedStatus);
-    }
-
-    result.sort((a, b) => {
-      if (sortBy === 'deadline') {
-        return new Date(a.registrationDeadline).getTime() - new Date(b.registrationDeadline).getTime();
-      }
-      return a.title.localeCompare(b.title);
-    });
-
-    return result;
-  }, [events, activeView, searchQuery, selectedCategory, selectedStatus, sortBy]);
-
-  // ==========================================
-  // Interactive Prototype Actions (Zero Dead Buttons)
-  // ==========================================
-
-  // Step 1 -> Step 2: Extraction completed from CaptureModal
+  // Actions
   const handleExtractionComplete = (draft: ExtractionDraft) => {
     setIsCaptureOpen(false);
     setExtractionDraft(draft);
     setIsExtractionReviewOpen(true);
-    addToast('info', 'Simulated Extraction Ready', 'Parsed dates, venue, and reporting schedule.');
+    addToast('info', 'Extraction Ready', 'Review parsed notice before confirming to timeline.');
   };
 
-  // Step 3: Confirm extracted event into Timeline
   const handleConfirmExtractedEvent = (finalData: ExtractionDraft) => {
     setIsExtractionReviewOpen(false);
 
-    // Update existing or add new
-    const existingIndex = events.findIndex((e) => e.title.includes('HackShift'));
+    const newEvent: EventItem = {
+      id: 'evt-' + Date.now(),
+      title: finalData.title,
+      organizer: finalData.organizer,
+      category: finalData.category,
+      status: 'Open',
+      registrationDeadline: finalData.registrationDeadline,
+      eventStartDate: finalData.eventStartDate,
+      eventEndDate: finalData.eventEndDate,
+      timeRange: '10:00 AM – 5:00 PM',
+      dateLabel: { month: 'NOV', day: '04' },
+      reportingTime: finalData.reportingTime,
+      venue: finalData.venue,
+      isOnline: false,
+      registrationUrl: finalData.registrationUrl,
+      summary: 'Extracted campus event notice.',
+      daysRemaining: 21,
+      thumbnailType: 'product-sprint',
+      tags: ['Hackathon', 'Campus'],
+      sourceNotice: {
+        id: 'src-' + Date.now(),
+        channel: finalData.sourceChannel,
+        receivedAt: 'Just now',
+        senderOrSource: 'Imported notice',
+        rawSnippet: finalData.sourceText,
+        confidenceScore: finalData.confidenceScore
+      },
+      changeHistory: [
+        {
+          id: 'h-' + Date.now(),
+          timestamp: 'Just now',
+          changeType: 'Created',
+          description: 'Added via extraction flow',
+          actor: 'User Manual'
+        }
+      ],
+      tasks: []
+    };
 
-    if (existingIndex >= 0) {
-      const updatedEvents = [...events];
-      const target = updatedEvents[existingIndex];
-      updatedEvents[existingIndex] = {
-        ...target,
-        venue: finalData.venue,
-        reportingTime: finalData.reportingTime,
-        registrationDeadline: finalData.registrationDeadline,
-        changeHistory: [
-          {
-            id: 'h-' + Date.now(),
-            timestamp: 'Just now (Simulated)',
-            changeType: 'Field Updated',
-            description: 'Confirmed new details from verified WhatsApp circular notice',
-            actor: 'User Manual'
-          },
-          ...target.changeHistory
-        ]
-      };
-      setEvents(updatedEvents);
-      addToast('success', 'Event Confirmed & Timeline Updated', `Synced ${finalData.title}`);
-    } else {
-      const newEvent: EventItem = {
-        id: 'evt-' + Date.now(),
+    setEvents((prev) => [newEvent, ...prev]);
+
+    // Also add to recently added
+    setRecentlyAdded((prev) => [
+      {
+        id: 'rec-' + Date.now(),
         title: finalData.title,
         organizer: finalData.organizer,
-        category: finalData.category,
-        status: 'Interested',
-        registrationDeadline: finalData.registrationDeadline,
-        eventStartDate: finalData.eventStartDate,
-        eventEndDate: finalData.eventEndDate,
-        reportingTime: finalData.reportingTime,
-        venue: finalData.venue,
-        registrationUrl: finalData.registrationUrl,
-        summary: 'Extracted campus event notice.',
-        daysRemaining: 14,
-        tags: [finalData.category, 'Campus Notice'],
-        sourceNotice: {
-          id: 'src-' + Date.now(),
-          channel: finalData.sourceChannel,
-          receivedAt: 'Just now',
-          senderOrSource: 'Imported notice',
-          rawSnippet: finalData.sourceText,
-          confidenceScore: finalData.confidenceScore
-        },
-        changeHistory: [
-          {
-            id: 'h-' + Date.now(),
-            timestamp: 'Just now',
-            changeType: 'Created',
-            description: 'Created through verified extraction flow',
-            actor: 'User Manual'
-          }
-        ],
-        tasks: [
-          {
-            id: 't-' + Date.now(),
-            title: 'Verify team registration on portal',
-            dueDate: finalData.registrationDeadline.split('T')[0],
-            completed: false,
-            priority: 'High'
-          }
-        ]
-      };
-      setEvents([newEvent, ...events]);
-      addToast('success', 'New Opportunity Added', `${finalData.title} added to your timeline.`);
-    }
+        eventId: newEvent.id,
+        timeAgo: 'Just now',
+        thumbnailType: 'product-sprint'
+      },
+      ...prev
+    ]);
+
+    addToast('success', 'Event Confirmed', `${finalData.title} added to your timeline.`);
   };
 
-  // Step 4: Resolve Conflict
   const handleResolveConflict = (decision: 'keep' | 'update' | 'manual', manualValue?: string) => {
     if (!conflictEventId) return;
 
@@ -254,7 +259,7 @@ export function App() {
           auditNote = `Kept previous record: ${evt.conflict.currentValue}`;
         } else if (decision === 'update') {
           resolvedValue = evt.conflict.newValue;
-          auditNote = `Accepted updated notice: ${evt.conflict.newValue}`;
+          auditNote = `Accepted update: ${evt.conflict.newValue}`;
         } else if (decision === 'manual' && manualValue) {
           resolvedValue = manualValue;
           auditNote = `Applied manual override: ${manualValue}`;
@@ -262,8 +267,9 @@ export function App() {
 
         return {
           ...evt,
-          venue: resolvedValue.split(',')[0],
-          reportingTime: resolvedValue.includes(',') ? resolvedValue.split(',')[1].trim() : evt.reportingTime,
+          venue: evt.conflict.field === 'venue' ? resolvedValue : evt.venue,
+          eventStartDate: evt.conflict.field === 'event_date' ? '2026-10-28T09:30:00' : evt.eventStartDate,
+          dateLabel: evt.conflict.field === 'event_date' ? { month: 'OCT', day: '28' } : evt.dateLabel,
           conflict: {
             ...evt.conflict,
             status: 'Resolved',
@@ -283,23 +289,39 @@ export function App() {
       })
     );
 
+    // Remove from attention items if present
+    setAttentionItems((prev) => prev.filter((item) => item.eventId !== conflictEventId));
+
     setConflictEventId(null);
     addToast(
       'success',
       'Discrepancy Reconciled',
       decision === 'keep'
-        ? 'Retained original notice details.'
+        ? 'Retained original value.'
         : decision === 'update'
-        ? 'Timeline updated with latest circular details.'
+        ? 'Updated schedule from latest circular.'
         : `Manual override applied: ${manualValue}`
     );
   };
 
-  // Toggle checklist item
-  const handleToggleTask = (eventId: string, taskId: string) => {
-    let taskName = '';
-    let isNowCompleted = false;
+  const handleToggleNextMove = (taskId: string) => {
+    setNextMoves((prev) =>
+      prev.map((task) => {
+        if (task.id === taskId) {
+          const nextState = !task.completed;
+          addToast(
+            nextState ? 'success' : 'info',
+            nextState ? 'Task Completed' : 'Task Marked Pending',
+            task.title
+          );
+          return { ...task, completed: nextState };
+        }
+        return task;
+      })
+    );
+  };
 
+  const handleToggleTaskInEvent = (eventId: string, taskId: string) => {
     setEvents((prev) =>
       prev.map((evt) => {
         if (evt.id !== eventId) return evt;
@@ -307,8 +329,6 @@ export function App() {
           ...evt,
           tasks: evt.tasks.map((task) => {
             if (task.id === taskId) {
-              taskName = task.title;
-              isNowCompleted = !task.completed;
               return { ...task, completed: !task.completed };
             }
             return task;
@@ -316,25 +336,16 @@ export function App() {
         };
       })
     );
-
-    if (taskName) {
-      addToast(
-        isNowCompleted ? 'success' : 'info',
-        isNowCompleted ? 'Task Marked Completed' : 'Task Marked Pending',
-        taskName
-      );
-    }
   };
 
-  // Add new prep task
-  const handleAddTask = (eventId: string, title: string) => {
+  const handleAddTaskToEvent = (eventId: string, title: string) => {
     setEvents((prev) =>
       prev.map((evt) => {
         if (evt.id !== eventId) return evt;
         const newTask = {
           id: 't-' + Date.now(),
           title,
-          dueDate: '2026-03-30',
+          dueDate: '2026-10-25',
           completed: false,
           priority: 'Medium' as const
         };
@@ -344,11 +355,9 @@ export function App() {
         };
       })
     );
-
-    addToast('success', 'Checklist Item Added', title);
+    addToast('success', 'Task Added', title);
   };
 
-  // Update Event Status
   const handleUpdateStatus = (eventId: string, newStatus: EventStatus) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -369,206 +378,424 @@ export function App() {
         };
       })
     );
-
     addToast('info', 'Status Updated', `Event marked as "${newStatus}"`);
   };
 
+  const handleAttentionItemClick = (item: AttentionItem) => {
+    if (item.type === 'conflict') {
+      const evt = events.find((e) => e.id === item.eventId);
+      if (evt && evt.conflict) {
+        setConflictEventId(evt.id);
+      } else {
+        setDetailEventId(item.eventId);
+      }
+    } else {
+      setDetailEventId(item.eventId);
+    }
+  };
+
   return (
-    <div className="app-container">
-      {/* Top Navigation */}
-      <Navbar
+    <div className="app-layout">
+      {/* 1. Left Sidebar */}
+      <Sidebar
         activeView={activeView}
         setActiveView={setActiveView}
         onOpenCapture={() => setIsCaptureOpen(true)}
-        conflictCount={conflictedEvents.length}
+        conflictCount={pendingConflicts.length}
+        onProfileMenuClick={() => setIsProfileOpen(true)}
       />
 
-      <main className="main-content">
-        {/* Workflow Concept Banner */}
-        <WorkflowBar
-          onStageClick={(stage) => {
-            if (stage === 'Capture') setIsCaptureOpen(true);
-            else if (stage === 'Extract') {
-              setIsExtractionReviewOpen(true);
-            } else if (stage === 'Reconcile') {
-              if (conflictedEvents.length > 0) {
-                setConflictEventId(conflictedEvents[0].id);
-              } else {
-                addToast('info', 'All Notices Reconciled', 'No pending conflicts in feeds.');
-              }
-            } else if (stage === 'Verify') {
-              setIsExtractionReviewOpen(true);
-            } else if (stage === 'Act') {
-              setActiveView('timeline');
-            }
-          }}
+      {/* 2. Main Viewport */}
+      <div className="app-main-viewport">
+        {/* Top Search & Profile Bar */}
+        <TopHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          isNotificationsOpen={isNotificationsOpen}
+          setIsNotificationsOpen={setIsNotificationsOpen}
+          isProfileOpen={isProfileOpen}
+          setIsProfileOpen={setIsProfileOpen}
+          onResetDemoData={handleResetDemoData}
+          onSelectNotificationItem={(eventId) => setDetailEventId(eventId)}
         />
 
-        {/* Welcome Heading & Product Intro */}
-        <div className="welcome-header">
-          <div className="welcome-row">
+        {/* Dynamic Page Views */}
+        <div className="dashboard-scroll-content">
+          {activeView === 'overview' && (
+            <>
+              {/* Greeting Header */}
+              <GreetingHeader
+                onOpenAddEvent={() => setIsCaptureOpen(true)}
+                dateString="Tue, 14 Oct 2026"
+                userName="Chakshu"
+              />
+
+              {/* 4 Summary Metric Cards */}
+              <MetricsRow
+                upcomingCount={12}
+                deadlinesCount={5}
+                needsReviewCount={pendingConflicts.length}
+                registeredCount={events.filter((e) => e.status === 'Registered').length}
+                onCardClick={(type) => {
+                  if (type === 'upcoming') setActiveView('timeline');
+                  else if (type === 'deadlines') {
+                    setActiveView('timeline');
+                    setTimelineStatus('In Progress');
+                  } else if (type === 'needs-review') setActiveView('needs-review');
+                  else if (type === 'registered') {
+                    setActiveView('timeline');
+                    setTimelineStatus('Registered');
+                  }
+                }}
+              />
+
+              {/* Main 2-Column Dashboard Layout */}
+              <div className="dashboard-main-grid">
+                {/* Left Column: Upcoming Events & Bottom Split */}
+                <div className="dashboard-left-col">
+                  {/* Upcoming Events Panel */}
+                  <UpcomingEventsSection
+                    events={searchedEvents}
+                    onSelectEvent={(evt) => setDetailEventId(evt.id)}
+                    onViewAll={() => setActiveView('timeline')}
+                  />
+
+                  {/* Bottom Split Row: Needs Attention & Recently Added */}
+                  <div className="split-panels-row">
+                    <NeedsAttentionCard
+                      items={attentionItems}
+                      onSelectItem={handleAttentionItemClick}
+                      onViewAll={() => setActiveView('needs-review')}
+                    />
+
+                    <RecentlyAddedCard
+                      items={recentlyAdded}
+                      onSelectItem={(item) => setDetailEventId(item.eventId)}
+                      onViewAll={() => setActiveView('timeline')}
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column: Calendar & Your Next Moves */}
+                <div className="dashboard-right-col">
+                  {/* Calendar Panel */}
+                  <CalendarPanel
+                    events={events}
+                    selectedDate={selectedCalendarDate}
+                    onSelectDate={(d) => {
+                      setSelectedCalendarDate(d);
+                      const matchingEvt = events.find((e) =>
+                        e.eventStartDate.startsWith(
+                          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+                        )
+                      );
+                      if (matchingEvt) {
+                        addToast('info', matchingEvt.title, matchingEvt.timeRange || matchingEvt.venue);
+                      }
+                    }}
+                    onOpenEvent={(evt) => setDetailEventId(evt.id)}
+                  />
+
+                  {/* Your Next Moves Panel */}
+                  <NextMovesPanel
+                    tasks={nextMoves}
+                    onToggleTask={handleToggleNextMove}
+                    onOpenTaskEvent={(eventId) => eventId && setDetailEventId(eventId)}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* View: My Timeline */}
+          {activeView === 'timeline' && (
             <div>
-              <h1 className="welcome-title">
-                One Timeline. All Opportunities.
-              </h1>
-              <p className="welcome-subtitle">
-                Organize hackathons, workshops, and application deadlines scattered across WhatsApp messages,
-                PDF flyers, emails, and portals into a single verified, actionable timeline.
-              </p>
-            </div>
-
-            <div className="welcome-stats-row">
-              <div className="stat-pill">
-                <Calendar size={14} style={{ color: '#818cf8' }} />
-                <span>Tracked: <strong>{events.length} Opportunities</strong></span>
-              </div>
-              <div className={`stat-pill ${conflictedEvents.length > 0 ? 'alert' : ''}`}>
-                <AlertCircle size={14} />
-                <span>Needs Review: <strong>{conflictedEvents.length} Discrepancy</strong></span>
-              </div>
-              <div className="stat-pill">
-                <CheckCircle2 size={14} style={{ color: '#10b981' }} />
-                <span>Action Moves: <strong>{allTasks.filter(t => t.task.completed).length}/{allTasks.length} Completed</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Next Upcoming Deadline Banner */}
-        {activeView === 'dashboard' && (
-          <NextDeadlineHero
-            event={urgentDeadlineEvent}
-            onOpenDetails={(evt) => setDetailEventId(evt.id)}
-          />
-        )}
-
-        {/* Active View Specific Content */}
-        {activeView === 'needs-review' && (
-          <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(245, 158, 11, 0.08)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <AlertCircle size={18} style={{ color: '#f59e0b' }} />
-              <strong style={{ color: '#fcd34d' }}>Needs Review Workspace</strong>
-            </div>
-            <p style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '0.25rem' }}>
-              Showing campus opportunities where overlapping circulars or revised flyers detected conflicting deadlines, venues, or reporting guidelines.
-            </p>
-          </div>
-        )}
-
-        {/* Main 2-Column Grid */}
-        <div className="dashboard-grid">
-          {/* Left Column: Search, Filters, and Timeline Cards */}
-          <div className="events-column">
-            {/* Filter and Search Controls */}
-            <div className="controls-card">
-              <div className="search-input-wrap">
-                <Search size={16} className="search-icon" />
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Search by title, department, venue, or tag (e.g. HackShift, DSA, BCI, GDG)..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              <div className="filter-tags-row">
-                <div className="category-pills">
-                  {['All', 'Hackathon', 'Workshop', 'Competition', 'Conference'].map((cat) => (
-                    <button
-                      key={cat}
-                      className={`filter-pill ${selectedCategory === cat ? 'active' : ''}`}
-                      onClick={() => setSelectedCategory(cat)}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="status-select-wrap">
-                  <Filter size={13} style={{ color: '#94a3b8' }} />
-                  <select
-                    className="select-dropdown"
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    aria-label="Filter by Status"
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Registered">Registered</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="Interested">Interested</option>
-                  </select>
-
-                  <ArrowUpDown size={13} style={{ color: '#94a3b8', marginLeft: '0.25rem' }} />
-                  <select
-                    className="select-dropdown"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'deadline' | 'title')}
-                    aria-label="Sort by"
-                  >
-                    <option value="deadline">Earliest Deadline</option>
-                    <option value="title">Alphabetical</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Event Timeline Cards List */}
-            <div className="timeline-list">
-              {filteredEvents.length === 0 ? (
-                <div style={{ padding: '3rem 1.5rem', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
-                  <Info size={28} style={{ color: '#64748b', margin: '0 auto 0.75rem auto' }} />
-                  <h4 style={{ fontSize: '1rem', fontWeight: 600 }}>No opportunities matching your filter</h4>
-                  <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                    Try clearing your search query or selecting "All" categories.
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>My Timeline</h1>
+                  <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
+                    All verified campus opportunities sorted by chronological cutoff dates.
                   </p>
+                </div>
+                <button
+                  className="btn-primary"
+                  onClick={() => setIsCaptureOpen(true)}
+                >
+                  + Add Event
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                <select
+                  value={timelineCategory}
+                  onChange={(e) => setTimelineCategory(e.target.value)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  <option value="All">All Categories</option>
+                  <option value="Hackathons">Hackathons</option>
+                  <option value="Competitions">Competitions</option>
+                  <option value="Workshops">Workshops</option>
+                  <option value="Internships">Internships</option>
+                  <option value="Conferences">Conferences</option>
+                </select>
+
+                <select
+                  value={timelineStatus}
+                  onChange={(e) => setTimelineStatus(e.target.value)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Registered">Registered</option>
+                  <option value="Interested">Interested</option>
+                  <option value="Open">Open</option>
+                </select>
+
+                {(timelineCategory !== 'All' || timelineStatus !== 'All') && (
                   <button
                     className="btn-secondary btn-sm"
-                    style={{ marginTop: '0.85rem' }}
                     onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('All');
-                      setSelectedStatus('All');
+                      setTimelineCategory('All');
+                      setTimelineStatus('All');
                     }}
                   >
                     Reset Filters
                   </button>
+                )}
+              </div>
+
+              {/* List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {searchedEvents
+                  .filter((e) => (timelineCategory === 'All' ? true : e.category.includes(timelineCategory)))
+                  .filter((e) => (timelineStatus === 'All' ? true : e.status === timelineStatus))
+                  .map((evt) => (
+                    <div
+                      key={evt.id}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #e9edf2',
+                        borderRadius: '12px',
+                        padding: '16px 20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setDetailEventId(evt.id)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="event-date-box">
+                          <span className="event-date-month">{evt.dateLabel?.month || 'OCT'}</span>
+                          <span className="event-date-day">{evt.dateLabel?.day || '14'}</span>
+                        </div>
+                        <div>
+                          <strong style={{ fontSize: '0.98rem', color: '#0f172a' }}>{evt.title}</strong>
+                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{evt.organizer} · {evt.venue}</div>
+                          <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                            {evt.tags.map((t) => (
+                              <span key={t} className="event-tag-pill">{t}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span className={`status-badge badge-${evt.status.toLowerCase().replace(' ', '-')}`}>
+                          {evt.status}
+                        </span>
+                        <ArrowRight size={16} color="#94a3b8" />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* View: Needs Review */}
+          {activeView === 'needs-review' && (
+            <div>
+              <div style={{ marginBottom: '20px' }}>
+                <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>Needs Review Workspace</h1>
+                <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
+                  Notices flagged for date shifts, venue changes, or ambiguous reporting requirements.
+                </p>
+              </div>
+
+              {pendingConflicts.length === 0 ? (
+                <div style={{ padding: '3rem', textAlign: 'center', background: '#ffffff', borderRadius: '12px', border: '1px solid #e9edf2' }}>
+                  <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 12px auto' }} />
+                  <h3 style={{ fontSize: '1.1rem', color: '#0f172a' }}>All Notices Reconciled</h3>
+                  <p style={{ color: '#64748b', fontSize: '0.85rem' }}>No discrepancies detected across your campus feeds.</p>
                 </div>
               ) : (
-                filteredEvents.map((evt) => (
-                  <EventCard
-                    key={evt.id}
-                    event={evt}
-                    onOpenDetails={(e) => setDetailEventId(e.id)}
-                    onOpenConflict={(e) => setConflictEventId(e.id)}
-                  />
-                ))
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {pendingConflicts.map((evt) => {
+                    const conf = evt.conflict;
+                    if (!conf) return null;
+                    return (
+                      <div
+                        key={evt.id}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #fee2e2',
+                          borderRadius: '12px',
+                          padding: '20px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="attention-icon-box bg-red-tint">
+                              <AlertCircle size={20} className="text-red" />
+                            </div>
+                            <div>
+                              <strong style={{ fontSize: '1rem', color: '#0f172a' }}>{evt.title}</strong>
+                              <span style={{ fontSize: '0.8rem', color: '#dc2626', marginLeft: '10px' }}>
+                                Conflicting field: <strong>{conf.fieldLabel}</strong>
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            className="btn-primary btn-sm"
+                            onClick={() => setConflictEventId(evt.id)}
+                          >
+                            Resolve Discrepancy
+                          </button>
+                        </div>
+
+                        <div className="conflict-comparison-grid">
+                          <div className="comparison-box">
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>CURRENT VALUE</span>
+                            <strong style={{ color: '#dc2626' }}>{conf.currentValue}</strong>
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Source: {conf.currentSource}</span>
+                          </div>
+
+                          <div className="comparison-box incoming">
+                            <span style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>NEWLY DETECTED UPDATE</span>
+                            <strong style={{ color: '#059669' }}>{conf.newValue}</strong>
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Source: {conf.newSource}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
-          </div>
+          )}
 
-          {/* Right Column: Needs Review & Next Moves Checklist */}
-          <SidebarWidgets
-            conflictedEvents={conflictedEvents}
-            allTasks={allTasks}
-            onToggleTask={handleToggleTask}
-            onOpenConflict={(e) => setConflictEventId(e.id)}
-          />
+          {/* View: Sources */}
+          {activeView === 'sources' && (
+            <div>
+              <div style={{ marginBottom: '20px' }}>
+                <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>Campus Feeds & Sources</h1>
+                <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
+                  Channels forwarding event announcements and flyers to your FORWARD pipeline.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {[
+                  { name: 'VIPS Tech Circle Official', channel: 'WhatsApp', notices: 14, active: true },
+                  { name: 'University Placement Cell (TPC)', channel: 'Email', notices: 8, active: true },
+                  { name: 'GDSC Delhi Announcements', channel: 'Discord', notices: 23, active: true },
+                  { name: 'IIT Delhi Academic Hub', channel: 'PDF Circulars', notices: 6, active: true },
+                  { name: 'Unstop & Devfolio Portals', channel: 'Web RSS', notices: 19, active: true }
+                ].map((src, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e9edf2',
+                      borderRadius: '12px',
+                      padding: '18px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{src.name}</strong>
+                      <span className="event-tag-pill">{src.channel}</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      {src.notices} circulars ingested and verified
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#059669', marginTop: '6px' }}>
+                      <CheckCircle2 size={13} />
+                      <span>Active sync connection</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* View: Settings */}
+          {activeView === 'settings' && (
+            <div style={{ maxWidth: '640px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a' }}>Settings & Demo Controls</h1>
+                <p style={{ fontSize: '0.86rem', color: '#64748b' }}>
+                  Manage student profile preferences and prototype testing parameters.
+                </p>
+              </div>
+
+              <div style={{ background: '#ffffff', border: '1px solid #e9edf2', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>Active Demo Date</label>
+                  <p style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px' }}>Aligned with Hackathon reference evaluation date.</p>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value="14 October 2026"
+                    disabled
+                    style={{ background: '#f8fafc', color: '#64748b' }}
+                  />
+                </div>
+
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>Reset Prototype State</label>
+                  <p style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '12px' }}>
+                    Restores default 12 opportunities, 3 attention alerts, and 5 next move tasks from reference.
+                  </p>
+                  <button
+                    className="btn-secondary"
+                    onClick={handleResetDemoData}
+                  >
+                    Restore Reference Mock Data
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
 
-      {/* Floating Interactive Toast Feedback */}
-      <Toast toasts={toasts} onDismiss={dismissToast} />
-
-      {/* Capture Modal (Text / File / Link) */}
+      {/* Interactive Modals */}
       <CaptureModal
         isOpen={isCaptureOpen}
         onClose={() => setIsCaptureOpen(false)}
         onExtractionSuccess={handleExtractionComplete}
       />
 
-      {/* Review Extraction Modal */}
       <ExtractionReviewModal
         isOpen={isExtractionReviewOpen}
         draft={extractionDraft}
@@ -576,35 +803,36 @@ export function App() {
         onConfirm={handleConfirmExtractedEvent}
         onTriggerConflictReview={() => {
           setIsExtractionReviewOpen(false);
-          if (conflictedEvents.length > 0) {
-            setConflictEventId(conflictedEvents[0].id);
+          if (pendingConflicts.length > 0) {
+            setConflictEventId(pendingConflicts[0].id);
           } else {
             setConflictEventId(events[0].id);
           }
         }}
       />
 
-      {/* Event Details Modal */}
       <EventDetailModal
         isOpen={!!detailEventId}
         event={selectedDetailEvent}
         onClose={() => setDetailEventId(null)}
         onUpdateStatus={handleUpdateStatus}
-        onToggleTask={handleToggleTask}
-        onAddTask={handleAddTask}
+        onToggleTask={handleToggleTaskInEvent}
+        onAddTask={handleAddTaskToEvent}
         onOpenConflict={(e) => {
           setDetailEventId(null);
           setConflictEventId(e.id);
         }}
       />
 
-      {/* Conflict Resolution Side-by-Side Modal */}
       <ConflictModal
         isOpen={!!conflictEventId}
         event={selectedConflictEvent}
         onClose={() => setConflictEventId(null)}
         onResolve={handleResolveConflict}
       />
+
+      {/* Toast Stack */}
+      <Toast toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
