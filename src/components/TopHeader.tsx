@@ -58,30 +58,30 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   }, [setIsNotificationsOpen, setIsProfileOpen]);
 
   return (
-    <header className="top-header" ref={headerRef}>
+    <header className="top-header flex items-center justify-between gap-4 px-6 py-3.5 bg-white border-b border-slate-200/80 sticky top-0 z-30" ref={headerRef}>
       {/* Search Input */}
-      <div className="search-bar-container">
-        <Search size={18} className="search-bar-icon" />
+      <div className="search-bar-container relative flex items-center flex-1 max-w-xl transition-all duration-150 focus-within:ring-2 focus-within:ring-blue-500/20 rounded-xl">
+        <Search size={18} className="search-bar-icon text-slate-400 absolute left-3.5 pointer-events-none" />
         <input
           ref={searchInputRef}
           type="text"
-          className="search-bar-input"
+          className="search-bar-input w-full pl-10 pr-16 py-2 text-sm text-slate-900 placeholder:text-slate-400 bg-slate-50 hover:bg-slate-100/70 focus:bg-white rounded-xl border border-slate-200 transition-colors outline-none"
           placeholder="Search events, organisers, venues or keywords..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <div className="search-shortcut-pill" onClick={() => searchInputRef.current?.focus()}>
+        <div className="search-shortcut-pill absolute right-3 hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-semibold text-slate-400 bg-white border border-slate-200 select-none cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => searchInputRef.current?.focus()}>
           <span>Ctrl</span>
           <span>K</span>
         </div>
       </div>
 
       {/* Header Right Controls */}
-      <div className="header-right-controls">
+      <div className="header-right-controls flex items-center gap-3">
         {/* Notification Bell */}
         <div style={{ position: 'relative' }}>
           <button
-            className="icon-button notification-bell-btn"
+            className="icon-button notification-bell-btn relative p-2 rounded-xl hover:bg-slate-100 active:scale-95 transition-all text-slate-600 hover:text-slate-900 cursor-pointer"
             onClick={() => {
               setIsNotificationsOpen(!isNotificationsOpen);
               setIsProfileOpen(false);
@@ -89,7 +89,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             aria-label="Notifications"
           >
             <Bell size={20} strokeWidth={1.8} />
-            <span className="unread-dot" />
+            <span className="unread-dot absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
           </button>
 
           {/* Notifications Dropdown */}
