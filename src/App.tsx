@@ -423,20 +423,34 @@ export function App() {
     );
   };
 
-  const handleAddTaskToEvent = (eventId: string, title: string) => {
+  const handleAddTaskToEvent = (
+    eventId: string,
+    title: string,
+    dueDate?: string,
+    priority?: 'High' | 'Medium' | 'Low'
+  ) => {
     setEvents((prev) =>
       prev.map((evt) => {
         if (evt.id !== eventId) return evt;
         const newTask = {
           id: 't-' + Date.now(),
           title,
-          dueDate: '2026-10-25',
+          dueDate: dueDate || '2026-10-25',
           completed: false,
-          priority: 'Medium' as const
+          priority: priority || ('Medium' as const),
+          eventId
+        };
+        const auditEntry = {
+          id: 'h-' + Date.now(),
+          timestamp: 'Just now',
+          changeType: 'Field Updated' as const,
+          description: `Added checklist task: ${title}`,
+          actor: 'User Manual' as const
         };
         return {
           ...evt,
-          tasks: [...evt.tasks, newTask]
+          tasks: [...evt.tasks, newTask],
+          changeHistory: [auditEntry, ...evt.changeHistory]
         };
       })
     );
