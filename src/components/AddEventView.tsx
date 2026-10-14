@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import type { EventItem, EventCategory, ExtractionDraft } from '../types';
 import { DatePickerDropdown } from './DatePickerDropdown';
 import { EventThumbnail } from './EventThumbnail';
-import { SAMPLE_CAPTURE_PRESETS } from '../data/mockData';
+import { SAMPLE_CAPTURE_PRESETS } from '../data/realEventsMock';
 import {
   X,
   FileText,

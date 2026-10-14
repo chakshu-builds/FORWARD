@@ -425,8 +425,8 @@ export const ChakshuAvatar: React.FC<{ size?: number; className?: string; src?: 
 }) => {
   const [hasError, setHasError] = React.useState(false);
 
-  // If a valid custom image URL is provided (not empty or default placeholder), render image
-  if (!hasError && src && src !== '/chakshu_arora.png' && src.trim() !== '') {
+  // If a valid custom image URL is provided (not empty or whitespace), render image
+  if (!hasError && src && src.trim() !== '') {
     return (
       <img
         src={src}

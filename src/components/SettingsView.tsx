@@ -53,7 +53,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [fullName, setFullName] = useState(userProfile.fullName);
   const [role, setRole] = useState(userProfile.role);
   const [institution, setInstitution] = useState(userProfile.institution);
-  const [avatarPreview, setAvatarPreview] = useState(userProfile.avatarUrl || '/chakshu_arora.png');
+  const [avatarPreview, setAvatarPreview] = useState(userProfile.avatarUrl || '');
   const [nameError, setNameError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 

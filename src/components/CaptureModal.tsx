@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ExtractionDraft } from '../types';
-import { SAMPLE_CAPTURE_PRESETS, SAMPLE_EXTRACTION_RESULT } from '../data/mockData';
+import { SAMPLE_CAPTURE_PRESETS, SAMPLE_EXTRACTION_RESULT } from '../data/realEventsMock';
 import { X, FileText, UploadCloud, Link as LinkIcon, Sparkles, Check, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 
 interface CaptureModalProps {

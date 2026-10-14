@@ -24,7 +24,7 @@ import {
   INITIAL_USER_PROFILE,
   INITIAL_NOTIFICATIONS,
   INITIAL_PREFERENCES
-} from './data/mockData';
+} from './data/realEventsMock';
 import { Sidebar } from './components/Sidebar';
 import { TopHeader } from './components/TopHeader';
 import { GreetingHeader } from './components/GreetingHeader';
